@@ -1,13 +1,25 @@
 # 批量给星穹铁道MMD模型添加材质和描边的Blender插件
 
 <p align="center">
-  <a href="LICENSE" target="_blank">
-    <img alt="MIT License" src="https://img.shields.io/github/license/yetone/openai-translator.svg?style=flat-square" />
-  </a>
-  <img alt="Python" src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&&logoColor=white" />
+<img alt="MIT License" src="https://img.shields.io/github/license/yetone/openai-translator.svg?style=flat-square"/>
+<img alt="Python" src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&&logoColor=white" />
 </p>   
 
 
+- [批量给星穹铁道MMD模型添加材质和描边的Blender插件](#批量给星穹铁道mmd模型添加材质和描边的blender插件)
+  - [功能/说明](#功能说明)
+  - [安装](#安装)
+    - [zip 方式安装](#zip-方式安装)
+    - [解压后安装](#解压后安装)
+    - [下载 **festivity** **Blender-StellarToon**](#下载-festivity-blender-stellartoon)
+  - [使用](#使用)
+    - [使用教程](#使用教程)
+    - [贴图数据说明](#贴图数据说明)
+    - [角色配置文件说明](#角色配置文件说明)
+    - [使用代码构建角色配置文件](#使用代码构建角色配置文件)
+  - [规则](#规则)
+  - [致谢](#致谢)
+  - [支持](#支持)
 
 
 ## 功能/说明
@@ -82,9 +94,11 @@
     - Avatar_Bronya_00_Body2_Color.png
     - Avatar_Bronya_00_Body2_LightMap.png
 
+<img src="./img/2.jpg" alt="2" style="zoom:80%;" />
 
 
-部分贴图结构不一样的，批量添加Shader后会导致贴图没上，可以添加Shader后手动修改。如：史瓦罗
+
+部分贴图结构不一样的，批量添加Shader后会导致贴图没上，可以添加Shader后**手动修改**。如：史瓦罗
 
 
 
