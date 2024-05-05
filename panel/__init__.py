@@ -1,0 +1,1 @@
+from .xj_panel import XiaoJuBaoPanel
