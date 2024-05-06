@@ -47,7 +47,7 @@
 - 下文有如何制作配置文件的教程，当然你也可以自己配一下，(≧﹏ ≦) 感谢支持。
 
 - <a href="https://afdian.net/a/xiaojubao" target="_blank">
-    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:30%;" />
+    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:20%;" />
     <span>我的爱发电</span>
     </a>
 
@@ -132,7 +132,7 @@
     - Avatar_Bronya_00_Body2_Color.png
     - Avatar_Bronya_00_Body2_LightMap.png
 - 插件匹配贴图使用的关键字：FaceMap、Face_Color、Hair_Color、Hair_Cool_Ramp、Hair_Warm_Ramp、Hair_LightMap、Body_Cool_Ramp、Body_Warm_Ramp、Body1_Color、Body1_LightMap、Body2_Color、Body2_LightMap、Body_Color、Body_LightMap；
-- **所以最好不要有重复的关键字，或者不一致的关键字**。注：**代码中有处理一部分逻辑，但是最好检查一下**，修改正确。
+- **所以贴图最好不要有重复的关键字，或者不一致的关键字**。注：**代码中有处理一部分逻辑，但是最好检查一下**，修改正确。
 
 <img src="./img/5.jpg" alt="2" style="zoom:80%;" />
 
@@ -205,7 +205,7 @@
 
 免费下载我已经配好的文件：
 <a href="https://afdian.net/a/xiaojubao" target="_blank">
-    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:30%;" />
+    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:20%;" />
     <span>我的爱发电</span>
 </a>
 
@@ -305,7 +305,7 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 制作不易，感谢。
 
 <a href="https://afdian.net/a/xiaojubao" target="_blank">
-    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:30%;" />
+    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:20%;" />
     <span>Support Me</span>
 </a>
 
