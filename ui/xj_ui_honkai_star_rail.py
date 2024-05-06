@@ -1,31 +1,41 @@
 import bpy
 from .. import bl_info
+from ..listener import on_shader_file_path_update, on_honkai_star_rail_material_path_update, on_honkai_star_rail_role_json_file_path_update
+from ..cache import CacheParams
+
+cache = CacheParams()
+default_shader_file_path = cache.get("xj_honkai_star_rail_blend_file_path")
+default_xj_honkai_star_rail_material_path = cache.get("xj_honkai_star_rail_material_path")
+default_xj_honkai_star_rail_role_json_file_path = cache.get("xj_honkai_star_rail_role_json_file_path")
 
 class XJ_HonkaiStarRail_UI():
     """honkai star rail"""
     # blend file
     bpy.types.Scene.xj_honkai_star_rail_blend_file_path = bpy.props.StringProperty(
-        name="blend file path",
-        description="blend文件路径",
-        default="",
+        name="shader blend file path",
+        description="shader blend文件路径",
+        default=default_shader_file_path if default_shader_file_path else "",
         maxlen=1024,
-        subtype='FILE_PATH'
+        subtype='FILE_PATH',
+        update=on_shader_file_path_update
     )
     # texure file
     bpy.types.Scene.xj_honkai_star_rail_material_path = bpy.props.StringProperty(
         name="texture file path",
         description="贴图路径",
-        default="",
+        default=default_xj_honkai_star_rail_material_path if default_xj_honkai_star_rail_material_path else "",
         maxlen=1024,
-        subtype='FILE_PATH'
+        subtype='FILE_PATH',
+        update=on_honkai_star_rail_material_path_update
     )
     # role json file
     bpy.types.Scene.xj_honkai_star_rail_role_json_file_path = bpy.props.StringProperty(
         name="role json Path",
         description="角色配置文件",
-        default="",
+        default=default_xj_honkai_star_rail_role_json_file_path if default_xj_honkai_star_rail_role_json_file_path else "",
         maxlen=1024,
-        subtype='FILE_PATH'
+        subtype='FILE_PATH',
+        update=on_honkai_star_rail_role_json_file_path_update
     )
     # outline thickness
     bpy.types.Scene.xj_honkai_star_rail_outline_thickness = bpy.props.FloatProperty(
@@ -41,7 +51,7 @@ class XJ_HonkaiStarRail_UI():
         row.label(text=version_str)
         
         row = box.row()
-        row.prop(scene, "xj_honkai_star_rail_blend_file_path", text="blend文件路径")
+        row.prop(scene, "xj_honkai_star_rail_blend_file_path", text="shader file path")
         
         row = box.row()
         row.prop(scene, "xj_honkai_star_rail_material_path", text="贴图路径")
@@ -66,3 +76,4 @@ class XJ_HonkaiStarRail_UI():
         
         row = box.row()
         row.operator("xj.honkai_star_rail_outline_remove", text="批量移除描边")
+        
