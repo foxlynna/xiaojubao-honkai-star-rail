@@ -368,13 +368,20 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         body_lightmap_texture = None
         for file_name in os.listdir(tex_file_path):
             if "Body_Color" in file_name and file_name.endswith(".png"):
-                body_color_texture = file_name
+                if body_color_texture and ("Eff" in body_color_texture or "_L" in body_color_texture):
+                    body_color_texture = file_name
+                else:
+                    body_color_texture = file_name
             elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
                 body_cool_ramp_texture = file_name
             elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
                 body_warm_ramp_texture = file_name
             elif "Body_LightMap" in file_name and file_name.endswith(".png"):
-                body_lightmap_texture = file_name
+                if body_lightmap_texture and ("Eff" in body_lightmap_texture or "_L" in body_lightmap_texture):
+                    body_lightmap_texture = file_name
+                else:
+                    body_lightmap_texture = file_name
+                
                 
         if body_color_texture:
             # if body_color_texture exists, use it, else load image
