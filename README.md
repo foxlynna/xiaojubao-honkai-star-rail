@@ -17,14 +17,47 @@
     - [贴图数据说明](#贴图数据说明)
     - [角色配置文件说明](#角色配置文件说明)
     - [使用代码构建角色配置文件](#使用代码构建角色配置文件)
+  - [常见问题](#常见问题)
   - [规则](#规则)
   - [致谢](#致谢)
   - [支持](#支持)
 
 
+
+
+![3](./img/3.jpg)
+
+
+
+此插件结合以下仿星穹铁道Shader一起使用：
+
+- Festivity's Honkai: Star Rail Shader，地址：https://github.com/festivities/Blender-StellarToon
+- 克里斯提亚娜大佬的汉化修复，下载地址：https://pan.baidu.com/s/1JKwny2CkdfSmqR1jT51BiQ?from=init&pwd=26JU  **用这个** 
+
+- 补一个下载链接：[StellarToon星穹铁道中文修复版V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=4XHsm1)
+
+
+
+⭐ 如果你觉得有用的话，可以给这个仓库点个 **Star**  ⭐
+
+
+
+- 此插件需要的角色配置文件：去我的爱发电页面**免费下载**，我会放在动态里面（包含几乎所有的角色，都是我一个一个配置的）。
+- 制作不易，有能力可以支持一下，发电后有惊喜（bushi，包含一个流萤的配置文件）；为什么单独放出来？没错，我想恰饭（大声）ヽ（≧□≦）ノ！！！
+- 下文有如何制作配置文件的教程，当然你也可以自己配一下，(≧﹏ ≦) 感谢支持。
+
+- <a href="https://afdian.net/a/xiaojubao" target="_blank">
+    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:30%;" />
+    <span>我的爱发电</span>
+    </a>
+
+
+
+
 ## 功能/说明
 
-- **仅支持 GooEngine Blender 分支**
+- **StellarToon Shader 仅支持 Blender GooEngine  分支**
+- GooEngine 3.6 环境下开发
 - 配合 **festivity** **Blender-StellarToon** 使用
 - 批量给模型添加 **Blender-StellarToon** Shader，修改了原有默认的**面部阴影**和**身体边缘光厚度**
 - 批量给模型添加/移除 **灯光矢量修改器**
@@ -32,19 +65,24 @@
 
 插件截图
 
-![1](./img/1.jpg)
+![4](./img/4.jpg)
 
+后续更新：
 
+- 场景多角色
+- ....
 
 ## 安装
 
 ### zip 方式安装
 
+[下载 - xiaojubao-honkai-star-rail.zip](https://github.com/foxlynna/xiaojubao-honkai-star-rail/releases)
+
 下载 zip 直接在Blender 插件管理面板安装，**不用解压**。
 
 ### 解压后安装
 
-解压后自行放入Blender插件文件夹，一般是 `用户\AppData\Roaming\Blender Foundation\Blender\3.6\scripts\addons`下
+解压后自行放入Blender插件文件夹，一般是 `用户\AppData\Roaming\Blender Foundation\Blender\你的版本号\scripts\addons`下
 
 ### 下载 **festivity** **Blender-StellarToon** 
 
@@ -66,13 +104,13 @@
 
 安装后，打开 N 窗，出现 ***XiaoJu*** 标签页。
 
-- blend 文件路径：输入下载的 festivity Blender-StellarToon blend 文件
+- shader blend 文件路径：输入下载的 festivity Blender-StellarToon blend 文件 `StellarToon星穹铁道中文修复版V3.blend`
 - 角色的贴图路径 - 贴图数据说明见下文
-- 角色的配置文件 - 配置MMD模型各部分网格名称与Sharder的映射 - 如何配置见下文
+- 角色的配置文件 - 配置MMD模型各部分网格名称与Sharder的映射 - 下载以及如何配置见下文
 
 
 
-选中角色的网格对象，点击各个按钮开始梭哈......
+选中角色的网格对象，点击各个按钮开始梭哈......ヾ(≧▽≦*)o
 
 ### 贴图数据说明
 
@@ -93,12 +131,10 @@
     - Avatar_Bronya_00_Body1_LightMap.png
     - Avatar_Bronya_00_Body2_Color.png
     - Avatar_Bronya_00_Body2_LightMap.png
+- 插件匹配贴图使用的关键字：FaceMap、Face_Color、Hair_Color、Hair_Cool_Ramp、Hair_Warm_Ramp、Hair_LightMap、Body_Cool_Ramp、Body_Warm_Ramp、Body1_Color、Body1_LightMap、Body2_Color、Body2_LightMap、Body_Color、Body_LightMap；
+- **所以最好不要有重复的关键字，或者不一致的关键字**。注：**代码中有处理一部分逻辑，但是最好检查一下**，修改正确。
 
-<img src="./img/2.jpg" alt="2" style="zoom:80%;" />
-
-
-
-部分贴图结构不一样的，批量添加Shader后会导致贴图没上，可以添加Shader后**手动修改**。如：史瓦罗
+<img src="./img/5.jpg" alt="2" style="zoom:80%;" />
 
 
 
@@ -106,7 +142,7 @@
 
 由于MMD的模型按材质分开后，网格很多，为每个网格正确地映射Shader，所以添加了这么一个配置文件。
 
-结构如下：主要是 `face/hair/body/body1/body2` 
+结构如下：主要是使用 `face/hair/body/body1/body2` 这些Key去映射对应的 Shader。**注：只有Key下面的网格才会被添加Shader**。
 
 - face 对应使用 面部 Shader
 - hair 对应使用 头发 Shader
@@ -167,9 +203,13 @@
 
 ### 使用代码构建角色配置文件
 
-将代码到复制到blender中，选中角色的网格后执行代码生成配置文件。修改配置文件的key为：`face/hair/body/body1/body2`
+免费下载我已经配好的文件：
+<a href="https://afdian.net/a/xiaojubao" target="_blank">
+    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:30%;" />
+    <span>我的爱发电</span>
+</a>
 
-**如果你嫌麻烦，可以去我的爱发电下载，更新中...（太肝了，制作不易，感谢支持）** [爱发电](https://afdian.net/a/xiaojubao)
+将代码到复制到blender中，选中角色的网格后执行代码生成配置文件。修改配置文件的key为：`face/hair/body/body1/body2`
 
 ```python
 import json
@@ -232,6 +272,15 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 
 
+## 常见问题
+
+- 贴图名称错误
+- 贴图关键字名称重复
+
+- 解决不了可提issue，或者B站私信我。[@何以千奈的橘子](https://space.bilibili.com/41350412) 
+
+
+
 ## 规则
 
 - AGPL 3.0 licence
@@ -255,35 +304,10 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 制作不易，感谢。
 
-[buy me coffee](https://afdian.net/a/xiaojubao)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<a href="https://afdian.net/a/xiaojubao" target="_blank">
+    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:30%;" />
+    <span>Support Me</span>
+</a>
 
 
 
