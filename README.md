@@ -69,7 +69,7 @@
 
 后续更新：
 
-- 场景多角色
+- 武器
 - ....
 
 ## 安装
@@ -276,6 +276,8 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 - 贴图名称错误
 - 贴图关键字名称重复
+
+- 部分材质没上是暗色的，分析情况，可手动切换到正确的材质球
 
 - 解决不了可提issue，或者B站私信我。[@何以千奈的橘子](https://space.bilibili.com/41350412) 
 
