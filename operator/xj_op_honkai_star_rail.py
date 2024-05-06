@@ -208,6 +208,15 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         else:
             mesh.data.materials.append(new_mat)
     
+    def get_texture_image(self, image_name, tex_file_path):
+        """get_texture_image"""
+        image = bpy.data.images.get(image_name)
+        if image and os.path.isfile(bpy.path.abspath(image.filepath)):
+            return image
+        else:
+            image = bpy.data.images.load(os.path.join(tex_file_path, image_name))
+        return image
+    
     def get_face_material(self, material, tex_file_path):
         """add and modify face material"""
         if not material.use_nodes:
@@ -227,7 +236,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         # face map texture exists
         if face_map_texture:
             # if face_map_texture exists, use it, else load image
-            image = bpy.data.images.get(face_map_texture) if bpy.data.images.get(face_map_texture) else bpy.data.images.load(os.path.join(tex_file_path, face_map_texture))
+            image = self.get_texture_image(face_map_texture, tex_file_path)
             # config Face Lightmap (Non-Color) (Channel Packed) node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Face Lightmap":
@@ -251,7 +260,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         # face color texture exists
         if face_color_texture:
             # if face_color_texture exists, use it, else load image
-            image = bpy.data.images.get(face_color_texture) if bpy.data.images.get(face_color_texture) else bpy.data.images.load(os.path.join(tex_file_path, face_color_texture))
+            image = self.get_texture_image(face_color_texture, tex_file_path)
             # config Face_Color node
             face_color_node = nodes.get("Face_Color")
             print(f"face_color_node: {face_color_node}")
@@ -286,7 +295,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
                 
         if hair_color_texture:
             # if face_color_texture exists, use it, else load image
-            image = bpy.data.images.get(hair_color_texture) if bpy.data.images.get(hair_color_texture) else bpy.data.images.load(os.path.join(tex_file_path, hair_color_texture))
+            image = self.get_texture_image(hair_color_texture, tex_file_path)
             # config Hair_Color node
             hair_color_node = nodes.get("Hair_Color_UV0")
             print(f"hair_color_node: {hair_color_node}")
@@ -302,7 +311,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         
         if hair_cool_ramp_texture:
             # if hair_cool_ramp_texture exists, use it, else load image
-            image = bpy.data.images.get(hair_cool_ramp_texture) if bpy.data.images.get(hair_cool_ramp_texture) else bpy.data.images.load(os.path.join(tex_file_path, hair_cool_ramp_texture))
+            image = self.get_texture_image(hair_cool_ramp_texture, tex_file_path)
             # config Hair_Cool_Ramp node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Hair Cool Shadow Ramp":
@@ -315,7 +324,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
                         hair_cool_ramp_node.image.alpha_mode = 'CHANNEL_PACKED'
         if hair_warm_ramp_texture:
             # if hair_warm_ramp_texture exists, use it, else load image
-            image = bpy.data.images.get(hair_warm_ramp_texture) if bpy.data.images.get(hair_warm_ramp_texture) else bpy.data.images.load(os.path.join(tex_file_path, hair_warm_ramp_texture))
+            image = self.get_texture_image(hair_warm_ramp_texture, tex_file_path)
             # config Hair_Warm_Ramp node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Hair Warm Shadow Ramp":
@@ -329,7 +338,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
 
         if hair_lightmap_texture:
             # if hair_lightmap_texture exists, use it, else load image
-            image = bpy.data.images.get(hair_lightmap_texture) if bpy.data.images.get(hair_lightmap_texture) else bpy.data.images.load(os.path.join(tex_file_path, hair_lightmap_texture))
+            image = self.get_texture_image(hair_lightmap_texture, tex_file_path)
             # config Hair_LightMap node
             hair_lightmap_node = nodes.get("Hair_Lightmap_UV0")
             print(f"hair_lightmap_node: {hair_lightmap_node}")
@@ -385,7 +394,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
                 
         if body_color_texture:
             # if body_color_texture exists, use it, else load image
-            image = bpy.data.images.get(body_color_texture) if bpy.data.images.get(body_color_texture) else bpy.data.images.load(os.path.join(tex_file_path, body_color_texture))
+            image = self.get_texture_image(body_color_texture, tex_file_path)
             # config Body_Color node
             body_color_node = nodes.get("Body_Color_UV0")
             print(f"body_color_node: {body_color_node}")
@@ -401,7 +410,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         
         if body_cool_ramp_texture:
             # if body_cool_ramp_texture exists, use it, else load image
-            image = bpy.data.images.get(body_cool_ramp_texture) if bpy.data.images.get(body_cool_ramp_texture) else bpy.data.images.load(os.path.join(tex_file_path, body_cool_ramp_texture))
+            image = self.get_texture_image(body_cool_ramp_texture, tex_file_path)
             # config body_cool_ramp node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Body Cool Shadow Ramp":
@@ -414,7 +423,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
                         body_cool_ramp_node.image.alpha_mode = 'CHANNEL_PACKED'
         if body_warm_ramp_texture:
             # if body_warm_ramp_texture exists, use it, else load image
-            image = bpy.data.images.get(body_warm_ramp_texture) if bpy.data.images.get(body_warm_ramp_texture) else bpy.data.images.load(os.path.join(tex_file_path, body_warm_ramp_texture))
+            image = self.get_texture_image(body_warm_ramp_texture, tex_file_path)
             # config body_warm_ramp node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Body Warm Shadow Ramp":
@@ -428,7 +437,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
 
         if body_lightmap_texture:
             # if body_lightmap_texture exists, use it, else load image
-            image = bpy.data.images.get(body_lightmap_texture) if bpy.data.images.get(body_lightmap_texture) else bpy.data.images.load(os.path.join(tex_file_path, body_lightmap_texture))
+            image = self.get_texture_image(body_lightmap_texture, tex_file_path)
             # config body_lightmap node
             body_lightmap_node = nodes.get("Body_Lightmap_UV0")
             print(f"body_lightmap_node: {body_lightmap_node}")
@@ -480,7 +489,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
                 
         if body1_color_texture:
             # if body1_color_texture exists, use it, else load image
-            image = bpy.data.images.get(body1_color_texture) if bpy.data.images.get(body1_color_texture) else bpy.data.images.load(os.path.join(tex_file_path, body1_color_texture))
+            image = self.get_texture_image(body1_color_texture, tex_file_path)
             # config Body1_Color node
             body1_color_node = nodes.get("Body_Color_UV0")
             print(f"body1_color_node: {body1_color_node}")
@@ -496,7 +505,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         
         if body_cool_ramp_texture:
             # if body_cool_ramp_texture exists, use it, else load image
-            image = bpy.data.images.get(body_cool_ramp_texture) if bpy.data.images.get(body_cool_ramp_texture) else bpy.data.images.load(os.path.join(tex_file_path, body_cool_ramp_texture))
+            image = self.get_texture_image(body_cool_ramp_texture, tex_file_path)
             # config body_cool_ramp node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Body Cool Shadow Ramp":
@@ -509,7 +518,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
                         body_cool_ramp_node.image.alpha_mode = 'CHANNEL_PACKED'
         if body_warm_ramp_texture:
             # if body_warm_ramp_texture exists, use it, else load image
-            image = bpy.data.images.get(body_warm_ramp_texture) if bpy.data.images.get(body_warm_ramp_texture) else bpy.data.images.load(os.path.join(tex_file_path, body_warm_ramp_texture))
+            image = self.get_texture_image(body_warm_ramp_texture, tex_file_path)
             # config body_warm_ramp node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Body Warm Shadow Ramp":
@@ -523,7 +532,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
 
         if body1_lightmap_texture:
             # if body1_lightmap_texture exists, use it, else load image
-            image = bpy.data.images.get(body1_lightmap_texture) if bpy.data.images.get(body1_lightmap_texture) else bpy.data.images.load(os.path.join(tex_file_path, body1_lightmap_texture))
+            image = self.get_texture_image(body1_lightmap_texture, tex_file_path)
             # config body1_lightmap node
             body1_lightmap_node = nodes.get("Body_Lightmap_UV0")
             print(f"body1_lightmap_node: {body1_lightmap_node}")
@@ -574,7 +583,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
                 
         if body2_color_texture:
             # if body2_color_texture exists, use it, else load image
-            image = bpy.data.images.get(body2_color_texture) if bpy.data.images.get(body2_color_texture) else bpy.data.images.load(os.path.join(tex_file_path, body2_color_texture))
+            image = self.get_texture_image(body2_color_texture, tex_file_path)
             # config Body2_Color node
             body2_color_node = nodes.get("Body_Color_UV0")
             print(f"body2_color_node: {body2_color_node}")
@@ -590,7 +599,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         
         if body_cool_ramp_texture:
             # if body_cool_ramp_texture exists, use it, else load image
-            image = bpy.data.images.get(body_cool_ramp_texture) if bpy.data.images.get(body_cool_ramp_texture) else bpy.data.images.load(os.path.join(tex_file_path, body_cool_ramp_texture))
+            image = self.get_texture_image(body_cool_ramp_texture, tex_file_path)
             # config body_cool_ramp node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Body Cool Shadow Ramp":
@@ -603,7 +612,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
                         body_cool_ramp_node.image.alpha_mode = 'CHANNEL_PACKED'
         if body_warm_ramp_texture:
             # if body_warm_ramp_texture exists, use it, else load image
-            image = bpy.data.images.get(body_warm_ramp_texture) if bpy.data.images.get(body_warm_ramp_texture) else bpy.data.images.load(os.path.join(tex_file_path, body_warm_ramp_texture))
+            image = self.get_texture_image(body_warm_ramp_texture, tex_file_path)
             # config body_warm_ramp node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Body Warm Shadow Ramp":
@@ -617,7 +626,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
 
         if body2_lightmap_texture:
             # if body2_lightmap_texture exists, use it, else load image
-            image = bpy.data.images.get(body2_lightmap_texture) if bpy.data.images.get(body2_lightmap_texture) else bpy.data.images.load(os.path.join(tex_file_path, body2_lightmap_texture))
+            image = self.get_texture_image(body2_lightmap_texture, tex_file_path)
             # config body2_lightmap node
             body2_lightmap_node = nodes.get("Body_Lightmap_UV0")
             print(f"body2_lightmap_node: {body2_lightmap_node}")
