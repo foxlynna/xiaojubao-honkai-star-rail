@@ -51,7 +51,7 @@ class XJ_HonkaiStarRail_UI():
         row.label(text=version_str)
         
         row = box.row()
-        row.prop(scene, "xj_honkai_star_rail_blend_file_path", text="shader file path")
+        row.prop(scene, "xj_honkai_star_rail_blend_file_path", text="shader blend文件路径")
         
         row = box.row()
         row.prop(scene, "xj_honkai_star_rail_material_path", text="贴图路径")
@@ -60,20 +60,20 @@ class XJ_HonkaiStarRail_UI():
         row.prop(scene, "xj_honkai_star_rail_role_json_file_path", text="角色配置文件")
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_add", text="批量添加材质")
+        row.operator("xj.honkai_star_rail_add", text="批量添加材质", icon="MATERIAL_DATA")
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_add_light_modifier", text="批量添加灯光矢量修改器")
+        row.operator("xj.honkai_star_rail_add_light_modifier", text="批量添加灯光矢量修改器", icon="ADD")
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_add_light_modifier_remove", text="批量移除灯光矢量修改器")
+        row.operator("xj.honkai_star_rail_add_light_modifier_remove", text="批量移除灯光矢量修改器", icon="REMOVE")
         
         row = box.row()
         row.prop(scene, "xj_honkai_star_rail_outline_thickness", text="描边厚度")
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_outline_add", text="批量添加/修改描边")
+        row.operator("xj.honkai_star_rail_outline_add", text="批量添加/修改描边", icon="ADD")
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_outline_remove", text="批量移除描边")
+        row.operator("xj.honkai_star_rail_outline_remove", text="批量移除描边", icon="REMOVE")
         
