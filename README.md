@@ -29,7 +29,7 @@
 
 
 
-此插件结合以下仿星穹铁道Shader一起使用：
+此插件结合以下***仿星穹铁道 Shader***一起使用：
 
 - Festivity's Honkai: Star Rail Shader，地址：https://github.com/festivities/Blender-StellarToon
 - 克里斯提亚娜大佬的汉化修复，下载地址：https://pan.baidu.com/s/1JKwny2CkdfSmqR1jT51BiQ?from=init&pwd=26JU  **用这个** 
@@ -42,7 +42,7 @@
 
 
 
-- 此插件需要的角色配置文件：去我的爱发电页面**免费下载**，我会放在动态里面（包含几乎所有的角色，都是我一个一个配置的）。
+- 此插件需要的角色配置文件：去我的爱发电页面**免费下载**，我会放在动态里面（**包含几乎所有的角色，都是我一个一个配置的**）。
 - 制作不易，有能力可以支持一下，发电后有惊喜（bushi，包含一个流萤的配置文件）；为什么单独放出来？没错，我想恰饭（大声）ヽ（≧□≦）ノ！！！
 - 下文有如何制作配置文件的教程，当然你也可以自己配一下，(≧﹏ ≦) 感谢支持。
 
@@ -53,15 +53,19 @@
 
 
 
+已测试数据：2024-05-07
+
+![6](./img/6.jpg)
+
 
 ## 功能/说明
 
-- **StellarToon Shader 仅支持 Blender GooEngine  分支**
+- ***StellarToon Shader 仅支持 Blender GooEngine  分支***
 - GooEngine 3.6 环境下开发
-- 配合 **festivity** **Blender-StellarToon** 使用
-- 批量给模型添加 **Blender-StellarToon** Shader，修改了原有默认的**面部阴影**和**身体边缘光厚度**
+- 配合 ***festivity  Blender-StellarToon*** 使用
+- 批量给模型添加 ***Blender-StellarToon Shader***，修改了原有默认的**面部阴影**和**身体边缘光厚度**
 - 批量给模型添加/移除 **灯光矢量修改器**
-- 批量给模型添加/移除 **Blender-StellarToon** 描边，将**描边厚度**作为参数暴露了出来，方便修改
+- 批量给模型添加/移除 ***Blender-StellarToon 描边***，将**描边厚度**作为参数暴露了出来，方便修改
 
 插件截图
 
@@ -71,6 +75,7 @@
 
 - 武器
 - ....
+- 可以关注下，后续也会做其他的插件
 
 ## 安装
 
@@ -92,7 +97,7 @@
 
 [克里斯提亚娜 大佬的 festivity Blender-StellarToon 使用教程](https://www.bilibili.com/video/BV1pW421A7Yz/?spm_id_from=333.999.0.0&vd_source=3ea4b8cada48ac13acbca4da8d719890)
 
-
+补一个下载链接：[StellarToon星穹铁道中文修复版V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=4XHsm1)
 
 ## 使用
 
@@ -104,9 +109,9 @@
 
 安装后，打开 N 窗，出现 ***XiaoJu*** 标签页。
 
-- shader blend 文件路径：输入下载的 festivity Blender-StellarToon blend 文件 `StellarToon星穹铁道中文修复版V3.blend`
-- 角色的贴图路径 - 贴图数据说明见下文
-- 角色的配置文件 - 配置MMD模型各部分网格名称与Sharder的映射 - 下载以及如何配置见下文
+- ***shader blend 文件路径***：输入下载的 festivity Blender-StellarToon blend 文件 `StellarToon星穹铁道中文修复版V3.blend`
+- ***角色的贴图路径*** - 贴图数据说明见下文
+- ***角色的配置文件*** - 配置 ***MMD 模型***  各部分***网格名称与Sharder的映射*** - 下载以及如何配置见下文
 
 
 
@@ -274,10 +279,12 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 ## 常见问题
 
-- 贴图名称错误
-- 贴图关键字名称重复
+- 贴图名称错误：如：有的身体贴图没有`Body`字段
+- 贴图关键字名称重复：如：身体贴图包含：`Body_Color`、`Body_Color_L`，插件有处理这部分逻辑
 
 - 部分材质没上是暗色的，分析情况，可手动切换到正确的材质球
+
+- ...
 
 - 解决不了可提issue，或者B站私信我。[@何以千奈的橘子](https://space.bilibili.com/41350412) 
 
