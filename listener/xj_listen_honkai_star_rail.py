@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import bpy
 from ..cache import CacheParams
 cache = CacheParams()

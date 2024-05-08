@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # author: 何以千奈的橘子
 # bilibili: https://space.bilibili.com/41350412
 # license: AGPL 3.0
@@ -19,4 +20,17 @@ from .operator import XJ_OP_HonkaiStarRail, XJ_OP_HonkaiStarRailLightModifier, X
 
 classes = (XiaoJuBaoPanel, XJ_OP_HonkaiStarRail, XJ_OP_HonkaiStarRailLightModifier, XJ_OP_HonkaiStarRailLightModifierRemove, XJ_OP_HonkaiStarRailOutline, XJ_OP_HonkaiStarRailOutlineRemove)
 
-register, unregister = bpy.utils.register_classes_factory(classes)
+register_class, unregister_class = bpy.utils.register_classes_factory(classes)
+def register():
+    register_class()
+    from .i18n import translation_dict
+    bpy.app.translations.register(bl_info['name'], translation_dict)
+    
+def unregister():
+    bpy.app.translations.unregister(bl_info['name'])
+    unregister_class()
+    
+    
+if __name__ == "__main__":
+    register()
+    

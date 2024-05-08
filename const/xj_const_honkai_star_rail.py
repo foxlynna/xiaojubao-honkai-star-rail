@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class HonkaiStarRailConst():
     """const for honkai star rail"""
     # texture name map

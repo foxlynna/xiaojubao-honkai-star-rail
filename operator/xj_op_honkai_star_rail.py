@@ -1,12 +1,17 @@
+# -*- coding: utf-8 -*-
 import bpy
+from bpy.app.translations import pgettext_iface as _
 import os
 import json
 from ..utils import MaterialUtils
 
 class XJ_OP_HonkaiStarRail(bpy.types.Operator):
-    """添加星穹铁道材质"""
+    """add honkai star rail material"""
     bl_label = "Add HonkaiStarRail Material"
     bl_idname = "xj.honkai_star_rail_add"
+    bl_description = _("Add HonkaiStarRail Material")
+    bl_options = {'REGISTER', 'UNDO'}
+    
     LIGHT_VECTOR_NODE_NAME = "Light Vectors"
     STELLAR_TOON_OUTLINE_NODE_NAME = "StellarToon - Outlines GN"
     STELLAR_MATERIAL_NAME = ["StellarToon - 基础描边", "StellarToon - 基础设置", "StellarToon - 头发", "StellarToon - 头发描边","StellarToon - 武器","StellarToon - 武器描边", "StellarToon - 面部", "StellarToon - 面部描边"]
@@ -701,9 +706,10 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
 
 
 class XJ_OP_HonkaiStarRailLightModifier(bpy.types.Operator):
-    """添加灯光矢量修改器"""
+    """add light vector modifier"""
     bl_idname = "xj.honkai_star_rail_add_light_modifier"
-    bl_label = "添加星穹铁道灯光矢量修改器"
+    bl_label = "add light vector modifier"
+    bl_description = _("Add HonkaiStarRail light vector modifier")
     bl_options = {'REGISTER', 'UNDO'}
     
     light_modifier_name = "XJ-Light-Vector"
@@ -746,9 +752,10 @@ class XJ_OP_HonkaiStarRailLightModifier(bpy.types.Operator):
         return {'FINISHED'}
 
 class XJ_OP_HonkaiStarRailLightModifierRemove(bpy.types.Operator):
-    """删除灯光矢量修改器"""
+    """remove light vector modifier"""
     bl_idname = "xj.honkai_star_rail_add_light_modifier_remove"
-    bl_label = "移除星铁铁道灯光矢量修改器"
+    bl_label = "remove light vector modifier"
+    bl_description = _("Remove HonkaiStarRail light vector modifier")
     bl_options = {'REGISTER', 'UNDO'}
     
     light_modifier_name = "XJ-Light-Vector"
@@ -768,9 +775,10 @@ class XJ_OP_HonkaiStarRailLightModifierRemove(bpy.types.Operator):
         return {'FINISHED'}
     
 class XJ_OP_HonkaiStarRailOutline(bpy.types.Operator):
-    """添加描边"""
+    """add outline"""
     bl_idname = "xj.honkai_star_rail_outline_add"
     bl_label = "Add StellarToon Outline"
+    bl_description = _("Add Outline")
     bl_options = {'REGISTER', 'UNDO'}
     # outline node group
     node_group_name = "StellarToon - Outlines GN 描边几何节点"
@@ -853,11 +861,11 @@ class XJ_OP_HonkaiStarRailOutline(bpy.types.Operator):
         if input_outline_material:
             geo_node_mod[input_outline_material.identifier] = bpy.data.materials.get(material_name)
 
-
 class XJ_OP_HonkaiStarRailOutlineRemove(bpy.types.Operator):
-    """移除描边"""
+    """remove outline"""
     bl_idname = "xj.honkai_star_rail_outline_remove"
     bl_label = "Remove StellarToon Outline"
+    bl_description = _("Remove Outline")
     bl_options = {'REGISTER', 'UNDO'}
 
     # outline node group

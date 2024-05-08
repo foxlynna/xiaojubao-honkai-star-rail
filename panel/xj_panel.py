@@ -1,10 +1,12 @@
+# -*- coding: utf-8 -*-
 import bpy
+from bpy.app.translations import pgettext_iface as _
 from .. import bl_info
 from ..ui import XJ_HonkaiStarRail_UI
 
 class XiaoJuBaoPanel(bpy.types.Panel):
     """Panel"""
-    bl_label = "小橘包-星穹铁道@何以千奈的橘子"
+    bl_label = _("XiaoJuBao-HonkaiStarRail@何以千奈的橘子")
     bl_idname = "XIAOJUBAO_PT_XiaoJu"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
