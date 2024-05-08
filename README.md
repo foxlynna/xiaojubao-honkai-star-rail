@@ -1,4 +1,4 @@
-# 批量给星穹铁道MMD模型添加材质和描边的Blender插件
+# 给星穹铁道MMD模型批量添加材质和描边的Blender插件
 
 <p align="center">
 <img alt="MIT License" src="https://img.shields.io/github/license/yetone/openai-translator.svg?style=flat-square"/>
@@ -6,12 +6,12 @@
 </p>   
 
 
-- [批量给星穹铁道MMD模型添加材质和描边的Blender插件](#批量给星穹铁道mmd模型添加材质和描边的blender插件)
-  - [功能/说明](#功能说明)
+- [给星穹铁道MMD模型批量添加材质和描边的Blender插件](#给星穹铁道mmd模型批量添加材质和描边的blender插件)
+  - [说明](#说明)
+  - [功能](#功能)
   - [安装](#安装)
-    - [zip 方式安装](#zip-方式安装)
-    - [解压后安装](#解压后安装)
-    - [下载 **festivity** **Blender-StellarToon**](#下载-festivity-blender-stellartoon)
+    - [方式一：zip 方式安装（推荐）](#方式一zip-方式安装推荐)
+    - [方式二：解压后安装](#方式二解压后安装)
   - [使用](#使用)
     - [使用教程](#使用教程)
     - [贴图数据说明](#贴图数据说明)
@@ -24,32 +24,29 @@
 
 
 
-
 ![3](./img/3.jpg)
 
 
 
-此插件结合以下***仿星穹铁道 Shader***一起使用：
+1. 此插件结合以下***仿星穹铁道 Shader***一起使用：
 
-- Festivity's Honkai: Star Rail Shader，地址：https://github.com/festivities/Blender-StellarToon
-- 克里斯提亚娜大佬的汉化修复，下载地址：https://pan.baidu.com/s/1JKwny2CkdfSmqR1jT51BiQ?from=init&pwd=26JU  **用这个** 
+   - Festivity's Honkai: Star Rail Shader，地址：https://github.com/festivities/Blender-StellarToon
 
-- 补一个下载链接：[StellarToon星穹铁道中文修复版V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=4XHsm1)
+   - 克里斯提亚娜大佬的汉化修复，下载地址：https://pan.baidu.com/s/1JKwny2CkdfSmqR1jT51BiQ?from=init&pwd=26JU  **用这个** 
 
 
+   - 补一个下载链接：[StellarToon星穹铁道中文修复版V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=4XHsm1)
+
+
+2. 此插件需要的**角色配置文件**：
+
+   - [xiaojubao插件-星穹铁道-角色配置文件夹2024-05-08.zip](https://1drv.ms/u/s!AihGDbeGMmo3j5kQuY8A1PBqbN1g5Q?e=VVNO3Z) 提取码：`%Tme5`（**包含55个角色的配置文件，都是我一个一个配置的**）
+
+   - 下文有如何制作配置文件的教程，没有的可以自己配一下(≧﹏ ≦) 
 
 ⭐ 如果你觉得有用的话，可以给这个仓库点个 **Star**  ⭐
 
-
-
-- 此插件需要的角色配置文件：去我的爱发电页面**免费下载**，我会放在动态里面（**包含几乎所有的角色，都是我一个一个配置的**）。
-- 制作不易，有能力可以支持一下，发电后有惊喜（bushi，包含一个流萤的配置文件）；为什么单独放出来？没错，我想恰饭（大声）ヽ（≧□≦）ノ！！！
-- 下文有如何制作配置文件的教程，当然你也可以自己配一下，(≧﹏ ≦) 感谢支持。
-
-- <a href="https://afdian.net/a/xiaojubao" target="_blank">
-    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:20%;" />
-    <span>我的爱发电</span>
-    </a>
+🔋支持一下，[Bilibli@何以千奈的橘子](https://space.bilibili.com/41350412) ，[爱发电@何以千奈的橘子](https://afdian.net/a/xiaojubao)🔋
 
 
 
@@ -57,12 +54,13 @@
 
 ![6](./img/6.jpg)
 
-
-## 功能/说明
+## 说明
 
 - ***StellarToon Shader 仅支持 Blender GooEngine  分支***
-- GooEngine 3.6 环境下开发
-- 配合 ***festivity  Blender-StellarToon*** 使用
+- GooEngine 3.6 环境下开发，其他版本自行测试看看，反馈给我下
+
+## 功能
+
 - 批量给模型添加 ***Blender-StellarToon Shader***，修改了原有默认的**面部阴影**和**身体边缘光厚度**
 - 批量给模型添加/移除 **灯光矢量修改器**
 - 批量给模型添加/移除 ***Blender-StellarToon 描边***，将**描边厚度**作为参数暴露了出来，方便修改
@@ -73,31 +71,22 @@
 
 后续更新：
 
-- 武器
-- ....
-- 可以关注下，后续也会做其他的插件
+- [ ] 武器
+- [ ] 面部描边修复
+...
+- 可以关注下，后续也会做其他的工具插件
 
 ## 安装
 
-### zip 方式安装
+### 方式一：zip 方式安装（推荐）
 
 [下载 - xiaojubao-honkai-star-rail.zip](https://github.com/foxlynna/xiaojubao-honkai-star-rail/releases)
 
 下载 zip 直接在Blender 插件管理面板安装，**不用解压**。
 
-### 解压后安装
+### 方式二：解压后安装
 
 解压后自行放入Blender插件文件夹，一般是 `用户\AppData\Roaming\Blender Foundation\Blender\你的版本号\scripts\addons`下
-
-### 下载 **festivity** **Blender-StellarToon** 
-
-[**festivity** **Blender-StellarToon**  Github项目地址](https://github.com/festivities/Blender-StellarToon)
-
-[克里斯提亚娜 大佬的汉化修复下载地址 - 百度网盘](https://pan.baidu.com/share/init?surl=JKwny2CkdfSmqR1jT51BiQ&pwd=26JU) - **下载这个**
-
-[克里斯提亚娜 大佬的 festivity Blender-StellarToon 使用教程](https://www.bilibili.com/video/BV1pW421A7Yz/?spm_id_from=333.999.0.0&vd_source=3ea4b8cada48ac13acbca4da8d719890)
-
-补一个下载链接：[StellarToon星穹铁道中文修复版V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=4XHsm1)
 
 ## 使用
 
@@ -207,12 +196,6 @@
 
 ### 使用代码构建角色配置文件
 
-免费下载我已经配好的文件：
-<a href="https://afdian.net/a/xiaojubao" target="_blank">
-    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:20%;" />
-    <span>我的爱发电</span>
-</a>
-
 1. 将代码到复制到***blender 脚本页面*** 
 
 2. 修改代码中的**输出路径、输出文件名**
@@ -318,10 +301,7 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 制作不易，感谢。
 
-<a href="https://afdian.net/a/xiaojubao" target="_blank">
-    <img src="https://pic1.afdiancdn.com/user/807d6134e9c411ee97d252540025c377/avatar/7297bb4331bad044e4490241a3f3a098_w1100_h1100_s213.jpeg?imageView2/1/w/120/h/120" alt="爱发电" style="zoom:20%;" />
-    <span>Support Me</span>
-</a>
+🔋支持一下，[Bilibli@何以千奈的橘子](https://space.bilibili.com/41350412) ，[爱发电@何以千奈的橘子](https://afdian.net/a/xiaojubao)🔋
 
 
 
