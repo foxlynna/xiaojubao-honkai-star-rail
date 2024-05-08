@@ -92,7 +92,7 @@
 
 ### 使用教程
 
-[教程 - @何以千奈的橘子 bilibili] 待更新
+[教程 - @何以千奈的橘子 bilibili](https://www.bilibili.com/video/BV1JT421X7v3)
 
 
 
