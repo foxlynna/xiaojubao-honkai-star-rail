@@ -3,8 +3,11 @@
 <p align="center">
 <img alt="MIT License" src="https://img.shields.io/github/license/yetone/openai-translator.svg?style=flat-square"/>
 <img alt="Python" src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&&logoColor=white" />
-</p>   
+</p>
 
+<p align="center">
+中文 | <a href="README_EN.md">English</a>
+</p>
 
 - [给星穹铁道MMD模型批量添加材质和描边的Blender插件](#给星穹铁道mmd模型批量添加材质和描边的blender插件)
   - [说明](#说明)
