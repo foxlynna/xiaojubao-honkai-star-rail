@@ -41,7 +41,8 @@
 
 ⭐ If you find it helpful, please consider giving this repository a **Star** ⭐
 
-🔋 Support me  [Bilibli@何以千奈的橘子](https://space.bilibili.com/41350412) 、[爱发电@何以千奈的橘子](https://afdian.net/a/xiaojubao) 🔋
+<a href='https://ko-fi.com/mikotoayu' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Support Me on ko-fi' />
+
 
 Tested models (exhausting ＞﹏＜):
 
@@ -273,4 +274,4 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 Creating this was no easy task. Thanks!
 
-🔋 Support us at [Bilibli@何以千奈的橘子](https://space.bilibili.com/41350412) and [爱发电@何以千奈的橘子](https://afdian.net/a/xiaojubao) 🔋
+<a href='https://ko-fi.com/mikotoayu' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Support Me on ko-fi' />
