@@ -14,16 +14,16 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
     
     LIGHT_VECTOR_NODE_NAME = "Light Vectors"
     STELLAR_TOON_OUTLINE_NODE_NAME = "StellarToon - Outlines GN"
-    STELLAR_MATERIAL_NAME = ["StellarToon - 基础描边", "StellarToon - 基础设置", "StellarToon - 头发", "StellarToon - 头发描边","StellarToon - 武器","StellarToon - 武器描边", "StellarToon - 面部", "StellarToon - 面部描边"]
+    STELLAR_MATERIAL_NAME = ["StellarToon - Base Outlines", "StellarToon - Base", "StellarToon - Hair", "StellarToon - Hair Outlines","StellarToon - Weapon","StellarToon - Weapon Outlines", "StellarToon - Face", "StellarToon - Face Outlines"]
     # tex and material map
     TEX_MATERIAL_MAP = {
-        "face": "StellarToon - 面部",
-        "hair": "StellarToon - 头发",
-        "body": "StellarToon - 基础设置",
-        "body1": "StellarToon - 基础设置",
-        "body2": "StellarToon - 基础设置",
+        "face": "StellarToon - Face",
+        "hair": "StellarToon - Hair",
+        "body": "StellarToon - Base",
+        "body1": "StellarToon - Base",
+        "body2": "StellarToon - Base",
     }
-    
+    print(f"""TEX_MATERIAL_MAP: {TEX_MATERIAL_MAP}""")
 
     def execute(self, context):
         blend_file_path = context.scene.xj_honkai_star_rail_blend_file_path
@@ -663,7 +663,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         node = nodes.get("Group.006")
         if node and node.type == 'GROUP' and node.node_tree and node.node_tree.name == "StellarToon - Base":
             # set rim light thinkness
-            node.inputs[63].default_value = 0.6
+            node.inputs[61].default_value = 0.6
             print(f"node.inputs[63].default_value: {node.inputs[63].default_value}")
     
     def set_face_material_default_value(self, nodes):
@@ -713,6 +713,7 @@ class XJ_OP_HonkaiStarRailLightModifier(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     
     light_modifier_name = "XJ-Light-Vector"
+    light_vector_node_group_name = "Light Vectors"
 
     def execute(self, context):
         selected_meshes = [obj for obj in context.selected_objects if obj.type == 'MESH']
@@ -733,9 +734,9 @@ class XJ_OP_HonkaiStarRailLightModifier(bpy.types.Operator):
                         bpy.ops.object.modifier_move_up(modifier=self.light_modifier_name)
                         current_index -= 1
             
-            node_group = bpy.data.node_groups.get("Light Vectors 灯光矢量")
+            node_group = bpy.data.node_groups.get(self.light_vector_node_group_name)
             if not node_group:
-                self.report({'WARNING'}, "Node group 'Light Vectors 灯光矢量' not found.")
+                self.report({'WARNING'}, "Node group 'Light Vectors' not found.")
                 return {'CANCELLED'}
             
             modifier.node_group = node_group
@@ -781,27 +782,22 @@ class XJ_OP_HonkaiStarRailOutline(bpy.types.Operator):
     bl_description = _("Add Outline")
     bl_options = {'REGISTER', 'UNDO'}
     # outline node group
-    node_group_name = "StellarToon - Outlines GN 描边几何节点"
+    node_group_name = "StellarToon - Outlines GN"
     # outline modifier name
     outline_modifier_name = "XJ-StellarToon - Outlines GN"
     # tex and outline material map
     TEX_OUTLINE_MATERIAL_MAP = {
-        "face": "StellarToon - 面部描边",
-        "hair": "StellarToon - 头发描边",
-        "body": "StellarToon - 基础描边",
-        "body1": "StellarToon - 基础描边",
-        "body2": "StellarToon - 基础描边",
+        "face": "StellarToon - Face Outlines",
+        "hair": "StellarToon - Hair Outlines",
+        "body": "StellarToon - Base Outlines",
+        "body1": "StellarToon - Base Outlines",
+        "body2": "StellarToon - Base Outlines",
     }
+    
 
     def execute(self, context):
         # 获取所有选中的网格对象
         selected_objects = [obj for obj in context.selected_objects if obj.type == 'MESH']
-        
-        
-        # 获取StellarToon - 基础描边材质
-        outline_material = bpy.data.materials.get("StellarToon - 基础描边")
-        if not outline_material:
-            raise ValueError("StellarToon - 基础描边材质不存在。")
         
         json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
         material_map = json_obj['material_map']
@@ -845,9 +841,9 @@ class XJ_OP_HonkaiStarRailOutline(bpy.types.Operator):
         geo_node_mod.node_group = node_group
         
         # set inputs
-        input_thickness = node_group.inputs.get("描边厚度")
-        input_mask_material = node_group.inputs.get("描边遮罩1")
-        input_outline_material = node_group.inputs.get("描边材质1")
+        input_thickness = node_group.inputs.get("Outline Thickness")
+        input_mask_material = node_group.inputs.get("Outline 1 Mask")
+        input_outline_material = node_group.inputs.get("Outline 1 Material")
         
         # set outline thickness
         if input_thickness:
@@ -869,7 +865,7 @@ class XJ_OP_HonkaiStarRailOutlineRemove(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     # outline node group
-    node_group_name = "StellarToon - Outlines GN 描边几何节点"
+    node_group_name = "StellarToon - Outlines GN"
     # outline modifier name
     outline_modifier_name = "XJ-StellarToon - Outlines GN"
     
