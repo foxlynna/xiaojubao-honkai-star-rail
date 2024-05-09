@@ -26,16 +26,12 @@
   - [Support](#support)
 
 
-![3](./img/3.jpg)
+![3](./img/3-en.jpg)
 
 1. This plugin is meant to be used with the ***Honkai: Star Rail Shader*** listed below:
 
    - Festivity's Honkai: Star Rail Shader: https://github.com/festivities/Blender-StellarToon
-
-   - **Use this:** 克里斯提亚娜's localized version: https://pan.baidu.com/s/1JKwny2CkdfSmqR1jT51BiQ?from=init&pwd=26JU
-
-   - An alternative download link: [StellarToon Honkai: Star Rail Localized Version V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=4XHsm1)
-
+- **Use this:** MMD fix version: [StellarToon-MMD-fix.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kS72qjPrzETl1yBg?e=eosGhe)
 2. Required **Character Configuration Files** for this plugin:
 
    - [xiaojubao-plugin-Honkai-Star-Rail-Character-Configuration-Folder-2024-05-08.zip](https://1drv.ms/u/s!AihGDbeGMmo3j5kQuY8A1PBqbN1g5Q?e=VVNO3Z), Extract Code: `%Tme5` (**Contains configuration files for 55 characters that I configured one by one**)
@@ -63,7 +59,7 @@ Tested models (exhausting ＞﹏＜):
 
 Plugin Screenshot:
 
-![4](./img/4.jpg)
+![4](./img/4-en.jpg)
 
 Upcoming updates:
 
@@ -77,7 +73,7 @@ Stay tuned for other tool plugins.
 
 ### Method 1: Install via ZIP (Recommended)
 
-[Download - xiaojubao-honkai-star-rail.zip](https://github.com/foxlynna/xiaojubao-honkai-star-rail/releases)
+[Download english version - xiaojubao-honkai-star-rail-en.zip](https://github.com/foxlynna/xiaojubao-honkai-star-rail/releases)
 
 Download the zip and install directly through the Blender add-on manager without extracting it.
 
@@ -89,13 +85,13 @@ Extract the contents and place them manually in the Blender add-ons folder, usua
 
 ### Tutorial
 
-[Tutorial - @何以千奈的橘子 bilibili] Coming soon.
+[Tutorial - @何以千奈的橘子 bilibili](https://www.bilibili.com/video/BV16z421m7GP/?vd_source=3ea4b8cada48ac13acbca4da8d719890).Only Chinese tutotail.
 
 After installation, open the N window to find the ***XiaoJu*** tab.
 
-- ***shader blend file path***: Enter the path to the downloaded festivity Blender-StellarToon blend file `StellarToon星穹铁道中文修复版V3.blend`
+- ***shader blend file path***: Enter the path to the downloaded festivity Blender-StellarToon blend file `StellarToon-MMD-fix.blend`
 - ***Character's Texture Path***: See the following for texture data explanation.
-- ***Character Configuration File***: Configuration mapping ***MMD models*** to the ***Shader*** - Download and configuration details below.
+- ***Character Configuration File***: Configuration mapping ***MMD models*** to the ***Shader*** - Configuration details below. Or use the files I've already configured.
 - Note: Paths will be cached and automatically filled in when opening a new empty project ψ(｀∇´)ψ.
 
 - Select the character's mesh objects and click the buttons to start configuring...ヾ(≧▽≦*)o
@@ -269,7 +265,6 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 ## Acknowledgments
 
 - [festivity](https://github.com/festivities)
-- [克里斯提亚娜](https://space.bilibili.com/322607631?spm_id_from=333.788.0.0)
 - [HoYoverse](https://www.hoyoverse.com/)
 - [DillonGoo Studios](https://www.dillongoostudios.com/)
 
