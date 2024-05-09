@@ -31,7 +31,8 @@
 1. This plugin is meant to be used with the ***Honkai: Star Rail Shader*** listed below:
 
    - Festivity's Honkai: Star Rail Shader: https://github.com/festivities/Blender-StellarToon
-- **Use this:** MMD fix version: [StellarToon-MMD-fix.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kS72qjPrzETl1yBg?e=eosGhe)
+   
+   - **Use this:** MMD fix version: [StellarToon-MMD-fix.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kS72qjPrzETl1yBg?e=eosGhe)
 2. Required **Character Configuration Files** for this plugin:
 
    - [xiaojubao-plugin-Honkai-Star-Rail-Character-Configuration-Folder-2024-05-08.zip](https://1drv.ms/u/s!AihGDbeGMmo3j5kQuY8A1PBqbN1g5Q?e=VVNO3Z), Extract Code: `%Tme5` (**Contains configuration files for 55 characters that I configured one by one**)
