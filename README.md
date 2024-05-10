@@ -38,7 +38,7 @@
    - 克里斯提亚娜大佬的汉化修复，下载地址：https://pan.baidu.com/s/1JKwny2CkdfSmqR1jT51BiQ?from=init&pwd=26JU  **用这个** 
 
 
-   - 补一个下载链接：[StellarToon星穹铁道中文修复版V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=4XHsm1)
+   - 补一个下载链接：[StellarToon星穹铁道中文修复版V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=l2hFGb) 提取码 `xiaojubao`
 
 
 2. 此插件需要的**角色配置文件**：
@@ -292,7 +292,7 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 - [festivity](https://github.com/festivities)
 
-- [克里斯提亚娜](https://space.bilibili.com/322607631?spm_id_from=333.788.0.0)
+- [克里斯提亚娜](https://space.bilibili.com/322607631)
 
 - [HoYoverse](https://www.hoyoverse.com/)
 
