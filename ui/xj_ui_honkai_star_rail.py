@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import bpy
-from bpy.app.translations import pgettext_iface
+from bpy.app.translations import pgettext_iface as _
 from .. import bl_info
 from ..listener import on_shader_file_path_update, on_honkai_star_rail_material_path_update, on_honkai_star_rail_role_json_file_path_update
 from ..cache import CacheParams
@@ -15,17 +15,23 @@ class XJ_HonkaiStarRail_UI():
     """honkai star rail"""
     # blend file
     bpy.types.Scene.xj_honkai_star_rail_blend_file_path = bpy.props.StringProperty(
-        name=pgettext_iface("Shader blend file path"),
-        description=pgettext_iface("Input shader blend file path"),
+        name=_("Shader blend file path"),
+        description=_("Input shader blend file path"),
         default=default_shader_file_path if default_shader_file_path else "",
         maxlen=1024,
         subtype='FILE_PATH',
         update=on_shader_file_path_update
     )
+    # is preset
+    bpy.types.Scene.xj_honkai_star_rail_is_preset = bpy.props.BoolProperty(
+        name=_("Is preset"),
+        description=_("Is this a preset file"),
+        default=False
+    )
     # texure file
     bpy.types.Scene.xj_honkai_star_rail_material_path = bpy.props.StringProperty(
-        name=pgettext_iface("Texture file path"),
-        description=pgettext_iface("Input texture file path"),
+        name=_("Texture file path"),
+        description=_("Input texture file path"),
         default=default_xj_honkai_star_rail_material_path if default_xj_honkai_star_rail_material_path else "",
         maxlen=1024,
         subtype='FILE_PATH',
@@ -33,8 +39,8 @@ class XJ_HonkaiStarRail_UI():
     )
     # role json file
     bpy.types.Scene.xj_honkai_star_rail_role_json_file_path = bpy.props.StringProperty(
-        name=pgettext_iface("Character JSON Path"),
-        description=pgettext_iface("Input character JSON Path"),
+        name=_("Character JSON Path"),
+        description=_("Input character JSON Path"),
         default=default_xj_honkai_star_rail_role_json_file_path if default_xj_honkai_star_rail_role_json_file_path else "",
         maxlen=1024,
         subtype='FILE_PATH',
@@ -42,8 +48,8 @@ class XJ_HonkaiStarRail_UI():
     )
     # outline thickness
     bpy.types.Scene.xj_honkai_star_rail_outline_thickness = bpy.props.FloatProperty(
-        name=pgettext_iface("Outline thickness"),
-        description=pgettext_iface("Input outline thickness"),
+        name=_("Outline thickness"),
+        description=_("Input outline thickness"),
         default=0.08
     )
     
@@ -54,29 +60,32 @@ class XJ_HonkaiStarRail_UI():
         row.label(text=version_str)
         
         row = box.row()
-        row.prop(scene, "xj_honkai_star_rail_blend_file_path", text=pgettext_iface("Shader blend file path"))
+        row.prop(scene, "xj_honkai_star_rail_blend_file_path", text=_("Shader blend file path"))
         
         row = box.row()
-        row.prop(scene, "xj_honkai_star_rail_material_path", text=pgettext_iface("Texture file path"))
+        row.prop(scene, "xj_honkai_star_rail_is_preset", text=_("Is Preset File"))
         
         row = box.row()
-        row.prop(scene, "xj_honkai_star_rail_role_json_file_path", text=pgettext_iface("Character JSON Path"))
+        row.prop(scene, "xj_honkai_star_rail_material_path", text=_("Texture file path"))
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_add", text=pgettext_iface("Batch apply materials"), icon="MATERIAL_DATA")
+        row.prop(scene, "xj_honkai_star_rail_role_json_file_path", text=_("Character JSON Path"))
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_add_light_modifier", text=pgettext_iface("Batch apply light vector modifiers"), icon="ADD")
+        row.operator("xj.honkai_star_rail_add", text=_("Batch apply materials"), icon="MATERIAL_DATA")
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_add_light_modifier_remove", text=pgettext_iface("Batch remove light vector modifiers"), icon="REMOVE")
+        row.operator("xj.honkai_star_rail_add_light_modifier", text=_("Batch apply light vector modifiers"), icon="ADD")
         
         row = box.row()
-        row.prop(scene, "xj_honkai_star_rail_outline_thickness", text=pgettext_iface("Outline thickness"))
+        row.operator("xj.honkai_star_rail_add_light_modifier_remove", text=_("Batch remove light vector modifiers"), icon="REMOVE")
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_outline_add", text=pgettext_iface("Batch add/modify outlines"), icon="ADD")
+        row.prop(scene, "xj_honkai_star_rail_outline_thickness", text=_("Outline thickness"))
         
         row = box.row()
-        row.operator("xj.honkai_star_rail_outline_remove", text=pgettext_iface("Batch remove outlines"), icon="REMOVE")
+        row.operator("xj.honkai_star_rail_outline_add", text=_("Batch add/modify outlines"), icon="ADD")
+        
+        row = box.row()
+        row.operator("xj.honkai_star_rail_outline_remove", text=_("Batch remove outlines"), icon="REMOVE")
         

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import bpy
+from bpy.types import Operator, Image
 from bpy.app.translations import pgettext_iface as _
 import os
 import json
+from typing import Optional, Dict, Any
 from ..utils import MaterialUtils
 
-class XJ_OP_HonkaiStarRail(bpy.types.Operator):
+class XJ_OP_HonkaiStarRail(Operator):
     """add honkai star rail material"""
     bl_label = "Add HonkaiStarRail Material"
     bl_idname = "xj.honkai_star_rail_add"
@@ -33,8 +35,16 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
             self.import_light_vector_empty_obj()
             # self.import_light_direction_collection(blend_file_path)
             
-            # loop selected objects
-            self.assign_materials_from_json(context.scene.xj_honkai_star_rail_role_json_file_path, context.scene.xj_honkai_star_rail_material_path)
+            # is preset
+            if context.scene.xj_honkai_star_rail_is_preset:
+                json_obj = self.load_first_script_as_json(blend_file_path)
+                if not json_obj:
+                    raise Exception("Failed to load preset json file")    
+                self.import_textures_from_blend(blend_file_path)
+                self.assign_materials_from_preset(json_obj)
+            else:    
+                self.assign_materials_from_json(context.scene.xj_honkai_star_rail_role_json_file_path, context.scene.xj_honkai_star_rail_material_path)
+            
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
@@ -110,6 +120,71 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         self.add_object_to_scene_collection("Head Origin")
         self.add_object_to_scene_collection("Head Forward")
         self.add_object_to_scene_collection("Head Up")
+    
+    def load_first_script_as_json(self, blend_filepath: str) -> Optional[Dict[str, Any]]:
+        """
+        from specified .blend file load first script as json
+        :param blend_filepath: .blend file full path
+        :return: json object/None
+        """
+        first_json_text_name = None
+        try:
+            with bpy.data.libraries.load(blend_filepath, link=False) as (data_from, data_to):
+                if data_from.texts:
+                    json_texts = [text for text in data_from.texts if text.endswith(".json")]
+                    if not json_texts:
+                        print(f"json text not found in {blend_filepath}")
+                        return None
+                    first_json_text_name = json_texts[0]
+                    data_to.texts = [first_json_text_name]
+                else:
+                    print("blend file has no text data")
+                    return None
+        except Exception as e:
+            print(f"load blend file error：{e}")
+            return None
+        # get first text data
+        imported_text = bpy.data.texts[first_json_text_name]
+        # parse json
+        try:
+            json_object = json.loads(imported_text.as_string())
+            return json_object
+        except json.JSONDecodeError as e:
+            print(f"parse json error：{e}")
+            return None
+    
+    def import_textures_from_blend(self, blend_filepath: str) -> None:
+        """
+        from specified .blend file import all existing textures
+        If the current project already has a real existing texture with the same name, it will be skipped.
+
+        :param blend_filepath: .blend file full path
+        """
+        try:
+            with bpy.data.libraries.load(blend_filepath, link=False) as (data_from, data_to):
+                if not data_from.images:
+                    print(f"from {blend_filepath} no images")
+                    return
+                valid_image_names = []
+                # check if image already exists
+                for img_name in data_from.images:
+                    if "Render Result" in img_name:
+                        continue
+                    if img_name in bpy.data.images:
+                        existing_image = bpy.data.images[img_name]
+                        if existing_image.filepath and os.path.isfile(bpy.path.abspath(existing_image.filepath)):
+                            print(f"{img_name} exists, skip")
+                            continue
+                        else:
+                            print(f"{img_name} exists, but not a valid file, remove")
+                            bpy.data.images.remove(existing_image)
+                    valid_image_names.append(img_name)
+                data_to.images = valid_image_names
+                print(f"import {len(valid_image_names)} images from {blend_filepath}")
+        except Exception as e:
+            print(f"load blend file error：{e}")
+            return
+        
     
     def add_object_to_scene_collection(self, obj_name):
         """Adds an object to the active scene's active collection if the object exists."""
@@ -213,7 +288,7 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         else:
             mesh.data.materials.append(new_mat)
     
-    def get_texture_image(self, image_name, tex_file_path):
+    def get_texture_image(self, image_name, tex_file_path) -> Image:
         """get_texture_image"""
         image = bpy.data.images.get(image_name)
         if image and os.path.isfile(bpy.path.abspath(image.filepath)):
@@ -232,16 +307,25 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         # loop tex_file_path and find FaceMap and Face_Color
         face_map_texture = None
         face_color_texture = None
-        for file_name in os.listdir(tex_file_path):
-            if "FaceMap" in file_name and file_name.endswith(".png"):
-                face_map_texture = file_name
-            elif "Face_Color" in file_name and file_name.endswith(".png"):
-                face_color_texture = file_name
+        if tex_file_path:
+            for file_name in os.listdir(tex_file_path):
+                if "FaceMap" in file_name and file_name.endswith(".png"):
+                    face_map_texture = file_name
+                elif "Face_Color" in file_name and file_name.endswith(".png"):
+                    face_color_texture = file_name
+        # tex_file_path is empty, is preset
+        if not tex_file_path:
+            for file_name in bpy.data.images:
+                if "FaceMap" in file_name and file_name.endswith(".png"):
+                    face_map_texture = file_name
+                elif "Face_Color" in file_name and file_name.endswith(".png"):
+                    face_color_texture = file_name
         
         # face map texture exists
         if face_map_texture:
             # if face_map_texture exists, use it, else load image
             image = self.get_texture_image(face_map_texture, tex_file_path)
+            print(f"imagexxxxxxxxxxxxxxxxx: {image}")
             # config Face Lightmap (Non-Color) (Channel Packed) node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Face Lightmap":
@@ -288,16 +372,28 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         hair_cool_ramp_texture = None
         hair_warm_ramp_texture = None
         hair_lightmap_texture = None
-        for file_name in os.listdir(tex_file_path):
-            if "Hair_Color" in file_name and file_name.endswith(".png"):
-                hair_color_texture = file_name
-            elif "Hair_Cool_Ramp" in file_name and file_name.endswith(".png"):
-                hair_cool_ramp_texture = file_name
-            elif "Hair_Warm_Ramp" in file_name and file_name.endswith(".png"):
-                hair_warm_ramp_texture = file_name
-            elif "Hair_LightMap" in file_name and file_name.endswith(".png"):
-                hair_lightmap_texture = file_name
-                
+        if tex_file_path:
+            for file_name in os.listdir(tex_file_path):
+                if "Hair_Color" in file_name and file_name.endswith(".png"):
+                    hair_color_texture = file_name
+                elif "Hair_Cool_Ramp" in file_name and file_name.endswith(".png"):
+                    hair_cool_ramp_texture = file_name
+                elif "Hair_Warm_Ramp" in file_name and file_name.endswith(".png"):
+                    hair_warm_ramp_texture = file_name
+                elif "Hair_LightMap" in file_name and file_name.endswith(".png"):
+                    hair_lightmap_texture = file_name
+        # tex_file_path is empty, is preset
+        if not tex_file_path:
+            for file_name in bpy.data.images:
+                if "Hair_Color" in file_name and file_name.endswith(".png"):
+                    hair_color_texture = file_name
+                elif "Hair_Cool_Ramp" in file_name and file_name.endswith(".png"):
+                    hair_cool_ramp_texture = file_name
+                elif "Hair_Warm_Ramp" in file_name and file_name.endswith(".png"):
+                    hair_warm_ramp_texture = file_name
+                elif "Hair_LightMap" in file_name and file_name.endswith(".png"):
+                    hair_lightmap_texture = file_name
+            
         if hair_color_texture:
             # if face_color_texture exists, use it, else load image
             image = self.get_texture_image(hair_color_texture, tex_file_path)
@@ -380,22 +476,40 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         body_cool_ramp_texture = None
         body_warm_ramp_texture = None
         body_lightmap_texture = None
-        for file_name in os.listdir(tex_file_path):
-            if "Body_Color" in file_name and file_name.endswith(".png"):
-                if body_color_texture and ("Eff" in body_color_texture or "_L" in body_color_texture):
-                    body_color_texture = file_name
-                else:
-                    body_color_texture = file_name
-            elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
-                body_cool_ramp_texture = file_name
-            elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
-                body_warm_ramp_texture = file_name
-            elif "Body_LightMap" in file_name and file_name.endswith(".png"):
-                if body_lightmap_texture and ("Eff" in body_lightmap_texture or "_L" in body_lightmap_texture):
-                    body_lightmap_texture = file_name
-                else:
-                    body_lightmap_texture = file_name
-                
+        
+        if tex_file_path:
+            for file_name in os.listdir(tex_file_path):
+                if "Body_Color" in file_name and file_name.endswith(".png"):
+                    if body_color_texture and ("Eff" in body_color_texture or "_L" in body_color_texture):
+                        body_color_texture = file_name
+                    else:
+                        body_color_texture = file_name
+                elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
+                    body_cool_ramp_texture = file_name
+                elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
+                    body_warm_ramp_texture = file_name
+                elif "Body_LightMap" in file_name and file_name.endswith(".png"):
+                    if body_lightmap_texture and ("Eff" in body_lightmap_texture or "_L" in body_lightmap_texture):
+                        body_lightmap_texture = file_name
+                    else:
+                        body_lightmap_texture = file_name
+        # tex_file_path is empty, is preset
+        if not tex_file_path:
+            for file_name in bpy.data.images:
+                if "Body_Color" in file_name and file_name.endswith(".png"):
+                    if body_color_texture and ("Eff" in body_color_texture or "_L" in body_color_texture):
+                        body_color_texture = file_name
+                    else:
+                        body_color_texture = file_name
+                elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
+                    body_cool_ramp_texture = file_name
+                elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
+                    body_warm_ramp_texture = file_name
+                elif "Body_LightMap" in file_name and file_name.endswith(".png"):
+                    if body_lightmap_texture and ("Eff" in body_lightmap_texture or "_L" in body_lightmap_texture):
+                        body_lightmap_texture = file_name
+                    else:
+                        body_lightmap_texture = file_name
                 
         if body_color_texture:
             # if body_color_texture exists, use it, else load image
@@ -482,16 +596,29 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         body_cool_ramp_texture = None
         body_warm_ramp_texture = None
         body1_lightmap_texture = None
-        for file_name in os.listdir(tex_file_path):
-            if "Body1_Color" in file_name and file_name.endswith(".png"):
-                body1_color_texture = file_name
-            elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
-                body_cool_ramp_texture = file_name
-            elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
-                body_warm_ramp_texture = file_name
-            elif "Body1_LightMap" in file_name and file_name.endswith(".png"):
-                body1_lightmap_texture = file_name
-                
+        
+        if tex_file_path:
+            for file_name in os.listdir(tex_file_path):
+                if "Body1_Color" in file_name and file_name.endswith(".png"):
+                    body1_color_texture = file_name
+                elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
+                    body_cool_ramp_texture = file_name
+                elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
+                    body_warm_ramp_texture = file_name
+                elif "Body1_LightMap" in file_name and file_name.endswith(".png"):
+                    body1_lightmap_texture = file_name
+        # tex_file_path is empty, is preset
+        if not tex_file_path:
+            for file_name in bpy.data.images:
+                if "Body1_Color" in file_name and file_name.endswith(".png"):
+                    body1_color_texture = file_name
+                elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
+                    body_cool_ramp_texture = file_name
+                elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
+                    body_warm_ramp_texture = file_name
+                elif "Body1_LightMap" in file_name and file_name.endswith(".png"):
+                    body1_lightmap_texture = file_name
+        
         if body1_color_texture:
             # if body1_color_texture exists, use it, else load image
             image = self.get_texture_image(body1_color_texture, tex_file_path)
@@ -576,16 +703,29 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
         body_cool_ramp_texture = None
         body_warm_ramp_texture = None
         body2_lightmap_texture = None
-        for file_name in os.listdir(tex_file_path):
-            if "Body2_Color" in file_name and file_name.endswith(".png"):
-                body2_color_texture = file_name
-            elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
-                body_cool_ramp_texture = file_name
-            elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
-                body_warm_ramp_texture = file_name
-            elif "Body2_LightMap" in file_name and file_name.endswith(".png"):
-                body2_lightmap_texture = file_name
-                
+        
+        if tex_file_path:
+            for file_name in os.listdir(tex_file_path):
+                if "Body2_Color" in file_name and file_name.endswith(".png"):
+                    body2_color_texture = file_name
+                elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
+                    body_cool_ramp_texture = file_name
+                elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
+                    body_warm_ramp_texture = file_name
+                elif "Body2_LightMap" in file_name and file_name.endswith(".png"):
+                    body2_lightmap_texture = file_name
+        # tex_file_path is empty, is preset
+        if not tex_file_path:
+            for file_name in os.listdir(tex_file_path):
+                if "Body2_Color" in file_name and file_name.endswith(".png"):
+                    body2_color_texture = file_name
+                elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
+                    body_cool_ramp_texture = file_name
+                elif "Body_Warm_Ramp" in file_name and file_name.endswith(".png"):
+                    body_warm_ramp_texture = file_name
+                elif "Body2_LightMap" in file_name and file_name.endswith(".png"):
+                    body2_lightmap_texture = file_name
+        
         if body2_color_texture:
             # if body2_color_texture exists, use it, else load image
             image = self.get_texture_image(body2_color_texture, tex_file_path)
@@ -682,7 +822,25 @@ class XJ_OP_HonkaiStarRail(bpy.types.Operator):
             # set rim light thinkness
             node.inputs[25].default_value = 1
             print(f"node.inputs[25].default_value: {node.inputs[25].default_value}")
-        
+    
+    def assign_materials_from_preset(self, json_obj: dict) -> None:
+        material_map = json_obj['material_map']
+        role_name = json_obj["role_name"]
+        # loop selected objects
+        for obj in bpy.context.selected_objects:
+            if obj.type == 'MESH':
+                # mesh_name_after
+                parts = obj.name.split('_')
+                if len(parts) > 1:
+                    mesh_name_after = parts[1]
+                    # find mesh_name_after type in material_map
+                    for key, items in material_map.items():
+                        if mesh_name_after in items:
+                            # get material name
+                            material_name = self.TEX_MATERIAL_MAP.get(key)
+                            if material_name:
+                               self.material_add_tex(obj, material_name, None, key, role_name)
+                            break            
     
     def assign_materials_from_json(self, json_file_path, tex_file_path):
         json_obj = MaterialUtils.load_role_json_obj(json_file_path)
