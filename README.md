@@ -292,7 +292,7 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 - [festivity](https://github.com/festivities)
 
-- [克里斯提亚娜](https://space.bilibili.com/322607631?spm_id_from=333.788.0.0)
+- [克里斯提亚娜](https://space.bilibili.com/322607631)
 
 - [HoYoverse](https://www.hoyoverse.com/)
 

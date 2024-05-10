@@ -268,6 +268,7 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 
 - [festivity](https://github.com/festivities)
 - fnoji
+- [克里斯提亚娜](https://space.bilibili.com/322607631)
 - [HoYoverse](https://www.hoyoverse.com/)
 - [DillonGoo Studios](https://www.dillongoostudios.com/)
 
