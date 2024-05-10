@@ -257,16 +257,17 @@ write_role_json("Bronya_布洛妮娅", collect_image_references(), path)
 - Duplicate texture keywords: e.g., body textures containing `Body_Color`, `Body_Color_L`. The plugin handles some logic but double-check.
 - Some materials appear darker if unassigned. Try manually switching to the correct shader.
 - ...
-- If the issue persists, submit an issue or DM me on Bilibili. [@何以千奈的橘子](https://space.bilibili.com/41350412).
+- If the issue persists, submit an issue or DM me on Bilibili. [@何以千奈的橘子](https://space.bilibili.com/41350412).  
 
 ## Rules
 
-- AGPL 3.0 License.
-- If you use this plugin, please credit the shader authors [festivity](https://github.com/festivities), localized version maintainer [克里斯提亚娜](https://space.bilibili.com/322607631?spm_id_from=333.788.0.0), and the plugin author [何以千奈的橘子](https://space.bilibili.com/41350412).
+- AGPL 3.0 License.	
+- If you use this plugin, please credit the shader authors [festivity](https://github.com/festivities), and the plugin author [何以千奈的橘子](https://space.bilibili.com/41350412).  you don't have to do it though.
 
 ## Acknowledgments
 
 - [festivity](https://github.com/festivities)
+- fnoji
 - [HoYoverse](https://www.hoyoverse.com/)
 - [DillonGoo Studios](https://www.dillongoostudios.com/)
 
