@@ -24,8 +24,8 @@ class XJ_HonkaiStarRail_UI():
     )
     # is preset
     bpy.types.Scene.xj_honkai_star_rail_is_preset = bpy.props.BoolProperty(
-        name=_("Is preset"),
-        description=_("Is this a preset file"),
+        name=_("Is all in configs"),
+        description=_("Is all in configs"),
         default=False
     )
     # texure file
@@ -63,7 +63,7 @@ class XJ_HonkaiStarRail_UI():
         row.prop(scene, "xj_honkai_star_rail_blend_file_path", text=_("Shader blend file path"))
         
         row = box.row()
-        row.prop(scene, "xj_honkai_star_rail_is_preset", text=_("Is Preset File"))
+        row.prop(scene, "xj_honkai_star_rail_is_preset", text=_("Is it to integrate configuration files"))
         
         row = box.row()
         row.prop(scene, "xj_honkai_star_rail_material_path", text=_("Texture file path"))
