@@ -23,8 +23,8 @@ translation_dict = {
         ("*", "Add Outline"): "添加描边",
         ("*", "Remove Outline"): "移除描边",
         ("*", "Is preset"): "是否预设",
-        ("*", "Is all in configs"): "是否整合配置文件",
-        ("*", "Is it to integrate configuration files"): "是否整合配置文件"
+        ("*", "Is all in configs"): "是否为整合配置文件",
+        ("*", "Is it to integrate configuration files"): "是否为整合配置文件"
     }
 }
 

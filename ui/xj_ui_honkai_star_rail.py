@@ -66,9 +66,11 @@ class XJ_HonkaiStarRail_UI():
         row.prop(scene, "xj_honkai_star_rail_is_preset", text=_("Is it to integrate configuration files"))
         
         row = box.row()
+        row.enabled = not scene.xj_honkai_star_rail_is_preset
         row.prop(scene, "xj_honkai_star_rail_material_path", text=_("Texture file path"))
         
         row = box.row()
+        row.enabled = not scene.xj_honkai_star_rail_is_preset
         row.prop(scene, "xj_honkai_star_rail_role_json_file_path", text=_("Character JSON Path"))
         
         row = box.row()
