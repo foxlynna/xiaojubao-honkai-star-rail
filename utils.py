@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import bpy
 import json
+from typing import Optional, Dict, Any
 
 class MaterialUtils:
     @staticmethod
@@ -178,4 +179,35 @@ class MaterialUtils:
             data = json.load(file)
         return data
 
-    
+    @staticmethod
+    def load_first_script_as_json(blend_filepath: str) -> Optional[Dict[str, Any]]:
+        """
+        from specified .blend file load first script as json
+        :param blend_filepath: .blend file full path
+        :return: json object/None
+        """
+        first_json_text_name = None
+        try:
+            with bpy.data.libraries.load(blend_filepath, link=False) as (data_from, data_to):
+                if data_from.texts:
+                    json_texts = [text for text in data_from.texts if text.endswith(".json")]
+                    if not json_texts:
+                        print(f"json text not found in {blend_filepath}")
+                        return None
+                    first_json_text_name = json_texts[0]
+                    data_to.texts = [first_json_text_name]
+                else:
+                    print("blend file has no text data")
+                    return None
+        except Exception as e:
+            print(f"load blend file error：{e}")
+            return None
+        # get first text data
+        imported_text = bpy.data.texts[first_json_text_name]
+        # parse json
+        try:
+            json_object = json.loads(imported_text.as_string())
+            return json_object
+        except json.JSONDecodeError as e:
+            print(f"parse json error：{e}")
+            return None

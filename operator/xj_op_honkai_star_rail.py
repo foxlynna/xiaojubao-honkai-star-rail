@@ -37,7 +37,7 @@ class XJ_OP_HonkaiStarRail(Operator):
             
             # is preset
             if context.scene.xj_honkai_star_rail_is_preset:
-                json_obj = self.load_first_script_as_json(blend_file_path)
+                json_obj = MaterialUtils.load_first_script_as_json(blend_file_path)
                 if not json_obj:
                     raise Exception("Failed to load preset json file")    
                 self.import_textures_from_blend(blend_file_path)
@@ -121,37 +121,7 @@ class XJ_OP_HonkaiStarRail(Operator):
         self.add_object_to_scene_collection("Head Forward")
         self.add_object_to_scene_collection("Head Up")
     
-    def load_first_script_as_json(self, blend_filepath: str) -> Optional[Dict[str, Any]]:
-        """
-        from specified .blend file load first script as json
-        :param blend_filepath: .blend file full path
-        :return: json object/None
-        """
-        first_json_text_name = None
-        try:
-            with bpy.data.libraries.load(blend_filepath, link=False) as (data_from, data_to):
-                if data_from.texts:
-                    json_texts = [text for text in data_from.texts if text.endswith(".json")]
-                    if not json_texts:
-                        print(f"json text not found in {blend_filepath}")
-                        return None
-                    first_json_text_name = json_texts[0]
-                    data_to.texts = [first_json_text_name]
-                else:
-                    print("blend file has no text data")
-                    return None
-        except Exception as e:
-            print(f"load blend file error：{e}")
-            return None
-        # get first text data
-        imported_text = bpy.data.texts[first_json_text_name]
-        # parse json
-        try:
-            json_object = json.loads(imported_text.as_string())
-            return json_object
-        except json.JSONDecodeError as e:
-            print(f"parse json error：{e}")
-            return None
+
     
     def import_textures_from_blend(self, blend_filepath: str) -> None:
         """
@@ -315,17 +285,17 @@ class XJ_OP_HonkaiStarRail(Operator):
                     face_color_texture = file_name
         # tex_file_path is empty, is preset
         if not tex_file_path:
-            for file_name in bpy.data.images:
+            for image in bpy.data.images:
+                file_name = image.name
                 if "FaceMap" in file_name and file_name.endswith(".png"):
                     face_map_texture = file_name
                 elif "Face_Color" in file_name and file_name.endswith(".png"):
                     face_color_texture = file_name
-        
         # face map texture exists
         if face_map_texture:
             # if face_map_texture exists, use it, else load image
             image = self.get_texture_image(face_map_texture, tex_file_path)
-            print(f"imagexxxxxxxxxxxxxxxxx: {image}")
+            # to do
             # config Face Lightmap (Non-Color) (Channel Packed) node
             for node in nodes:
                 if node.type == 'GROUP' and node.node_tree and node.node_tree.name == "Face Lightmap":
@@ -384,7 +354,8 @@ class XJ_OP_HonkaiStarRail(Operator):
                     hair_lightmap_texture = file_name
         # tex_file_path is empty, is preset
         if not tex_file_path:
-            for file_name in bpy.data.images:
+            for image in bpy.data.images:
+                file_name = image.name
                 if "Hair_Color" in file_name and file_name.endswith(".png"):
                     hair_color_texture = file_name
                 elif "Hair_Cool_Ramp" in file_name and file_name.endswith(".png"):
@@ -495,7 +466,8 @@ class XJ_OP_HonkaiStarRail(Operator):
                         body_lightmap_texture = file_name
         # tex_file_path is empty, is preset
         if not tex_file_path:
-            for file_name in bpy.data.images:
+            for image in bpy.data.images:
+                file_name = image.name
                 if "Body_Color" in file_name and file_name.endswith(".png"):
                     if body_color_texture and ("Eff" in body_color_texture or "_L" in body_color_texture):
                         body_color_texture = file_name
@@ -609,7 +581,8 @@ class XJ_OP_HonkaiStarRail(Operator):
                     body1_lightmap_texture = file_name
         # tex_file_path is empty, is preset
         if not tex_file_path:
-            for file_name in bpy.data.images:
+            for image in bpy.data.images:
+                file_name = image.name
                 if "Body1_Color" in file_name and file_name.endswith(".png"):
                     body1_color_texture = file_name
                 elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
@@ -716,7 +689,8 @@ class XJ_OP_HonkaiStarRail(Operator):
                     body2_lightmap_texture = file_name
         # tex_file_path is empty, is preset
         if not tex_file_path:
-            for file_name in os.listdir(tex_file_path):
+            for image in os.listdir(tex_file_path):
+                file_name = image.name
                 if "Body2_Color" in file_name and file_name.endswith(".png"):
                     body2_color_texture = file_name
                 elif "Body_Cool_Ramp" in file_name and file_name.endswith(".png"):
@@ -863,7 +837,7 @@ class XJ_OP_HonkaiStarRail(Operator):
                             break
 
 
-class XJ_OP_HonkaiStarRailLightModifier(bpy.types.Operator):
+class XJ_OP_HonkaiStarRailLightModifier(Operator):
     """add light vector modifier"""
     bl_idname = "xj.honkai_star_rail_add_light_modifier"
     bl_label = "add light vector modifier"
@@ -910,7 +884,7 @@ class XJ_OP_HonkaiStarRailLightModifier(bpy.types.Operator):
         self.report({'INFO'}, "Light vector modifiers added or updated.")
         return {'FINISHED'}
 
-class XJ_OP_HonkaiStarRailLightModifierRemove(bpy.types.Operator):
+class XJ_OP_HonkaiStarRailLightModifierRemove(Operator):
     """remove light vector modifier"""
     bl_idname = "xj.honkai_star_rail_add_light_modifier_remove"
     bl_label = "remove light vector modifier"
@@ -933,7 +907,7 @@ class XJ_OP_HonkaiStarRailLightModifierRemove(bpy.types.Operator):
         self.report({'INFO'}, "Light vector modifiers removed.")
         return {'FINISHED'}
     
-class XJ_OP_HonkaiStarRailOutline(bpy.types.Operator):
+class XJ_OP_HonkaiStarRailOutline(Operator):
     """add outline"""
     bl_idname = "xj.honkai_star_rail_outline_add"
     bl_label = "Add StellarToon Outline"
@@ -954,10 +928,15 @@ class XJ_OP_HonkaiStarRailOutline(bpy.types.Operator):
     
 
     def execute(self, context):
+        blend_file_path = context.scene.xj_honkai_star_rail_blend_file_path
         # 获取所有选中的网格对象
         selected_objects = [obj for obj in context.selected_objects if obj.type == 'MESH']
-        
-        json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
+        json_obj = None
+        # is preset
+        if context.scene.xj_honkai_star_rail_is_preset:
+            json_obj = MaterialUtils.load_first_script_as_json(blend_file_path)
+        else:
+            json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
         material_map = json_obj['material_map']
         
         # 遍历所有选中的网格对象
@@ -1015,7 +994,7 @@ class XJ_OP_HonkaiStarRailOutline(bpy.types.Operator):
         if input_outline_material:
             geo_node_mod[input_outline_material.identifier] = bpy.data.materials.get(material_name)
 
-class XJ_OP_HonkaiStarRailOutlineRemove(bpy.types.Operator):
+class XJ_OP_HonkaiStarRailOutlineRemove(Operator):
     """remove outline"""
     bl_idname = "xj.honkai_star_rail_outline_remove"
     bl_label = "Remove StellarToon Outline"
