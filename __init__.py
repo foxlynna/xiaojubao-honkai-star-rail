@@ -4,13 +4,13 @@
 # license: AGPL 3.0
 
 bl_info = {
-    "name": "小橘包",
+    "name": "小橘包-星穹铁道",
     "blender": (3, 6, 0),
     "category": "UI",
-    "description": "小橘包",
+    "description": "小橘包-星穹铁道",
     "author": "何以千奈的橘子",
-    "version": (0, 1, 5),
-    "honkai_star_rail_version": (0, 1, 5),
+    "version": (0, 2, 0),
+    "honkai_star_rail_version": (0, 2, 0),
     "location": "View3D > Sidebar > XiaoJu Tab"
 }
 

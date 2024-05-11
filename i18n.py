@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 translation_dict = {
     "zh_CN": {
-        ("*", "XiaoJuBao-HonkaiStarRail@何以千奈的橘子"): "小橘包@何以千奈的橘子",
+        ("*", "XiaoJuBao-HonkaiStarRail@何以千奈的橘子"): "小橘包-星穹铁道@何以千奈的橘子",
         ("*", "Shader blend file path"): "Shader blend 文件路径",
         ("*", "Input shader blend file path"): "输入 Shader blend 文件路径",
         ("*", "Texture file path"): "贴图文件路径",
@@ -22,6 +22,9 @@ translation_dict = {
         ("*", "Remove HonkaiStarRail light vector modifier"): "移除灯光矢量修改器",
         ("*", "Add Outline"): "添加描边",
         ("*", "Remove Outline"): "移除描边",
+        ("*", "Is preset"): "是否预设",
+        ("*", "Is all in configs"): "是否为整合配置文件",
+        ("*", "Is it to integrate configuration files"): "是否为整合配置文件"
     }
 }
 
