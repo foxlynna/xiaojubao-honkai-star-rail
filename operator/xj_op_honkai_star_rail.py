@@ -4,7 +4,7 @@ from bpy.types import Operator, Image
 from bpy.app.translations import pgettext_iface as _
 import os
 import json
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from ..utils import MaterialUtils
 
 class XJ_OP_HonkaiStarRail(Operator):
@@ -42,8 +42,10 @@ class XJ_OP_HonkaiStarRail(Operator):
                     raise Exception("Failed to load preset json file")    
                 self.import_textures_from_blend(blend_file_path)
                 self.assign_materials_from_preset(json_obj)
+                self.join_group_mesh(json_obj)
             else:    
                 self.assign_materials_from_json(context.scene.xj_honkai_star_rail_role_json_file_path, context.scene.xj_honkai_star_rail_material_path)
+            
             
             return {'FINISHED'}
         else:
@@ -835,7 +837,41 @@ class XJ_OP_HonkaiStarRail(Operator):
                             if material_name:
                                self.material_add_tex(obj, material_name, tex_file_path, key, role_name)
                             break
-
+                        
+    def join_group_mesh(self, json_obj: Dict[str, Any]) -> None:
+        """join same group mesh"""
+        selected_meshes = [obj for obj in bpy.context.selected_objects if obj.type == 'MESH']
+        mesh_groups = {}
+        # loop material_map
+        for material_key, mesh_names in json_obj['material_map'].items():
+            matched_meshes = []
+            if len(mesh_names) > 1:
+                for mesh in selected_meshes:
+                    parts = mesh.name.split('_')
+                    if(len(parts) > 1):
+                        mesh_name_after = parts[1]
+                        if any(name == mesh_name_after for name in mesh_names):
+                            matched_meshes.append(mesh)
+                # join meshes
+                if matched_meshes:
+                    mesh_groups[material_key] = matched_meshes
+        # After collecting all groups, merge them
+        for name, meshes in mesh_groups.items():
+            self.merge_meshes(meshes, name)
+        
+    def merge_meshes(self, meshes: List[bpy.types.Object], name: str):
+        """join meshes"""
+        # clear selection
+        bpy.ops.object.select_all(action='DESELECT')
+        # reselect meshes
+        for mesh in meshes:
+            mesh.select_set(True)        
+        
+        bpy.context.view_layer.objects.active = meshes[0]  
+        for mesh in meshes[1:]:  
+            mesh.select_set(True)
+        bpy.ops.object.join()
+        bpy.context.object.name = name
 
 class XJ_OP_HonkaiStarRailLightModifier(Operator):
     """add light vector modifier"""
@@ -929,7 +965,7 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
 
     def execute(self, context):
         blend_file_path = context.scene.xj_honkai_star_rail_blend_file_path
-        # 获取所有选中的网格对象
+        # get all selected mesh objects
         selected_objects = [obj for obj in context.selected_objects if obj.type == 'MESH']
         json_obj = None
         # is preset
@@ -939,7 +975,7 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
             json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
         material_map = json_obj['material_map']
         
-        # 遍历所有选中的网格对象
+        # 遍历所有选中的网格对象 iterate over selected mesh objects
         for obj in selected_objects:
             if obj.type == 'MESH':
                 # mesh_name_after
@@ -953,8 +989,17 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
                             material_name = self.TEX_OUTLINE_MATERIAL_MAP.get(key)
                             if material_name:
                                self.material_add_outline(obj, material_name)
+                            else:
+                                self.report({'WARNING'}, f"Mesh '{obj.name}' not found in material map.")
                             break
-            
+                else: # not found mesh_name_after, use joined name: face/body/body1/body2/hair
+                    obj_name = obj.name
+                    material_name = self.TEX_OUTLINE_MATERIAL_MAP.get(obj_name)
+                    if material_name:
+                        self.material_add_outline(obj, material_name)
+                    else:
+                        self.report({'WARNING'}, f"Mesh '{obj_name}' not found in material map.")
+                    
 
         return {'FINISHED'}
     
