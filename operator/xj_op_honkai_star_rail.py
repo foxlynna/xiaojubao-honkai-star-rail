@@ -45,7 +45,8 @@ class XJ_OP_HonkaiStarRail(Operator):
                 self.join_group_mesh(json_obj)
             else:    
                 self.assign_materials_from_json(context.scene.xj_honkai_star_rail_role_json_file_path, context.scene.xj_honkai_star_rail_material_path)
-            
+            # head origin constraint
+            self.set_child_of_constraints_to_heads()
             
             return {'FINISHED'}
         else:
@@ -872,6 +873,43 @@ class XJ_OP_HonkaiStarRail(Operator):
             mesh.select_set(True)
         bpy.ops.object.join()
         bpy.context.object.name = name
+    
+    def set_child_of_constraints_to_heads(self, head_origin_name: str = 'Head Origin') -> None:
+        """set child of constraints to heads"""
+        # Find the 'Head Origin' empty object in the scene
+        head_origin = bpy.data.objects.get(head_origin_name)
+        if not head_origin:
+            print("Error: No object named 'Head Origin' found.")
+            return
+
+        # calculate the number of armatures in the scene
+        armatures = [obj for obj in bpy.data.objects if obj.type == 'ARMATURE']
+        if len(armatures) > 1:
+            print("Error: More than one armature found in the scene. Exiting without setting constraints.")
+            return
+
+        # if there's only one armature in the scene, continue
+        if armatures:
+            armature = armatures[0]
+            # 约束 find or add 'Child Of' constraint
+            child_of_constraint = next((c for c in head_origin.constraints if c.type == 'CHILD_OF' and c.target == armature), None)
+            if not child_of_constraint:
+                child_of_constraint = head_origin.constraints.new(type='CHILD_OF')
+            # set
+            child_of_constraint.target = armature
+            
+            if '頭' in armature.data.bones:
+                child_of_constraint.subtarget = '頭'
+                # set inverse
+                bpy.context.view_layer.objects.active = head_origin
+                head_origin.select_set(True)
+                bpy.ops.constraint.childof_set_inverse(constraint="Child Of", owner='OBJECT')
+                # move head origin to 頭 location
+                head_bone = armature.data.bones['頭']
+                head_origin.location = armature.matrix_world @ head_bone.head_local
+                print(f"Constraint set successfully for armature {armature.name}.")
+            else:
+                print(f"No bone named '頭' found in armature {armature.name}.")
 
 class XJ_OP_HonkaiStarRailLightModifier(Operator):
     """add light vector modifier"""
