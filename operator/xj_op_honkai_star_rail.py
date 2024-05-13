@@ -42,14 +42,14 @@ class XJ_OP_HonkaiStarRail(Operator):
                     raise Exception("Failed to load preset json file")    
                 self.import_textures_from_blend(blend_file_path)
                 self.assign_materials_from_preset(json_obj)
-                self.join_group_mesh(json_obj)
-                
             else:    
                 json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
                 if not json_obj:
                     raise Exception("Failed to load preset json file")  
                 self.assign_materials_from_json(json_obj, context.scene.xj_honkai_star_rail_material_path)
-            
+            if context.scene.xj_honkai_star_rail_is_join_mesh:
+                # join mesh
+                self.join_group_mesh(json_obj)
             # emmison material
             self.modify_emission_material(json_obj.get('emmision', []))
             # eyeshadow
