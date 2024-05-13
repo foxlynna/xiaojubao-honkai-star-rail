@@ -51,9 +51,9 @@ class XJ_OP_HonkaiStarRail(Operator):
                 self.assign_materials_from_json(json_obj, context.scene.xj_honkai_star_rail_material_path)
             
             # emmison material
-            self.modify_emission_material(json_obj['emmision'])
+            self.modify_emission_material(json_obj.get('emmision', []))
             # eyeshadow
-            self.modify_eyeshadow_material(json_obj['eyeshadow'])
+            self.modify_eyeshadow_material(json_obj.get('eyeshadow', []))
             # head origin constraint
             self.set_child_of_constraints_to_heads()
             
@@ -900,7 +900,7 @@ class XJ_OP_HonkaiStarRail(Operator):
         if armatures:
             armature = armatures[0]
             # 约束 find or add 'Child Of' constraint
-            child_of_constraint = next((c for c in head_origin.constraints if c.type == 'CHILD_OF' and c.target == armature), None)
+            child_of_constraint = next((c for c in head_origin.constraints if c.type == 'CHILD_OF' and not c.target), None)
             if not child_of_constraint:
                 child_of_constraint = head_origin.constraints.new(type='CHILD_OF')
             # set
