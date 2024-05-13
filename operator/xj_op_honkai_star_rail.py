@@ -34,7 +34,7 @@ class XJ_OP_HonkaiStarRail(Operator):
             self.import_material(blend_file_path)
             self.import_light_vector_empty_obj()
             # self.import_light_direction_collection(blend_file_path)
-            
+            json_obj : Optional[Dict[str, Any]] = None
             # is preset
             if context.scene.xj_honkai_star_rail_is_preset:
                 json_obj = MaterialUtils.load_first_script_as_json(blend_file_path)
@@ -43,8 +43,17 @@ class XJ_OP_HonkaiStarRail(Operator):
                 self.import_textures_from_blend(blend_file_path)
                 self.assign_materials_from_preset(json_obj)
                 self.join_group_mesh(json_obj)
+                
             else:    
-                self.assign_materials_from_json(context.scene.xj_honkai_star_rail_role_json_file_path, context.scene.xj_honkai_star_rail_material_path)
+                json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
+                if not json_obj:
+                    raise Exception("Failed to load preset json file")  
+                self.assign_materials_from_json(json_obj, context.scene.xj_honkai_star_rail_material_path)
+            
+            # emmison material
+            self.modify_emission_material(json_obj['emmision'])
+            # eyeshadow
+            self.modify_eyeshadow_material(json_obj['eyeshadow'])
             # head origin constraint
             self.set_child_of_constraints_to_heads()
             
@@ -819,8 +828,7 @@ class XJ_OP_HonkaiStarRail(Operator):
                                self.material_add_tex(obj, material_name, None, key, role_name)
                             break            
     
-    def assign_materials_from_json(self, json_file_path, tex_file_path):
-        json_obj = MaterialUtils.load_role_json_obj(json_file_path)
+    def assign_materials_from_json(self, json_obj: Dict[str, Any], tex_file_path: str) -> None:
         material_map = json_obj['material_map']
         role_name = json_obj["role_name"]
         # loop selected objects
@@ -910,6 +918,80 @@ class XJ_OP_HonkaiStarRail(Operator):
                 print(f"Constraint set successfully for armature {armature.name}.")
             else:
                 print(f"No bone named '頭' found in armature {armature.name}.")
+    
+    def modify_emission_material(self, material_names: List[str]) -> None:
+        """
+        Modifies specified materials to connect a texture node's color output to the Principled BSDF's emission input.
+        Args:
+        material_names (List[str]): List of material names to be modified.
+        """
+        # Iterate over the list of material names provided
+        for mat_name in material_names:
+            # Attempt to retrieve the material by name
+            material = bpy.data.materials.get(mat_name)
+            
+            # Check if the material exists and uses nodes
+            if material and material.use_nodes:
+                nodes = material.node_tree.nodes
+                links = material.node_tree.links
+
+                # Try to find the 'Mmd Base Tex' texture node and the 'Principled BSDF' node
+                texture_node = next((node for node in nodes if node.type == 'TEX_IMAGE'), None)
+                bsdf_node = next((node for node in nodes if node.type == 'BSDF_PRINCIPLED'), None)
+
+                # Ensure both nodes were found
+                if texture_node and bsdf_node:
+                    # Check if the connection already exists
+                    already_connected = any(link.to_node == bsdf_node and link.from_node == texture_node and link.from_socket == texture_node.outputs['Color'] and link.to_socket == bsdf_node.inputs['Emission'] for link in links)
+
+                    # If not already connected, create a new link
+                    if not already_connected:
+                        color_output = texture_node.outputs['Color']  # Assuming the texture node has an output named 'Color'
+                        emission_input = bsdf_node.inputs['Emission']  # Assuming BSDF has an input named 'Emission'
+                        links.new(color_output, emission_input)
+                        print(f"Connected texture color from '{texture_node.name}' to emission of '{bsdf_node.name}' in material '{mat_name}'")
+                else:
+                    print(f"Texture node or Principled BSDF node not found in material '{mat_name}'")
+            else:
+                print(f"Material '{mat_name}' not found or does not use nodes.")
+    
+    def modify_eyeshadow_material(self, material_names: List[str]) -> None:
+        """
+        Modifies eyeshadow materials to ensure they have a Transparency BSDF node set to a specific color and connected to the material output.
+        
+        Args:
+            material_names (List[str]): List of material names to be modified.
+        """
+        # Iterate over the provided material names
+        for mat_name in material_names:
+            # Attempt to retrieve the material by name
+            material = bpy.data.materials.get(mat_name)
+            
+            # Check if the material exists and uses nodes
+            if material and material.use_nodes:
+                nodes = material.node_tree.nodes
+                links = material.node_tree.links
+
+                # Try to find a Transparent BSDF node by type
+                trans_bsdf_node = next((node for node in nodes if node.type == 'BSDF_TRANSPARENT'), None)
+
+                # If no Transparent BSDF node exists, create one
+                if not trans_bsdf_node:
+                    trans_bsdf_node = nodes.new(type='ShaderNodeBsdfTransparent')
+                    trans_bsdf_node.location = (300, 300)  # Position the new node slightly apart
+
+                # Set the color and alpha of the Transparent BSDF node
+                trans_bsdf_node.inputs['Color'].default_value = (0.031, 0.031, 0.031, 1)  # RGB and Alpha
+
+                # Find the material output node
+                material_output_node = next((node for node in nodes if node.type == 'OUTPUT_MATERIAL'), None)
+                if material_output_node:
+                    # Connect the Transparent BSDF node to the Surface input of the Material Output node
+                    links.new(trans_bsdf_node.outputs['BSDF'], material_output_node.inputs['Surface'])
+                    print(f"Modified material '{mat_name}' with a Transparent BSDF node.")
+            else:
+                print(f"Material '{mat_name}' not found or does not use nodes.")
+        
 
 class XJ_OP_HonkaiStarRailLightModifier(Operator):
     """add light vector modifier"""
