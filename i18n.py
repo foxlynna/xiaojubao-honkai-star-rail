@@ -24,7 +24,8 @@ translation_dict = {
         ("*", "Remove Outline"): "移除描边",
         ("*", "Is preset"): "是否预设",
         ("*", "Is all in configs"): "是否为整合配置文件",
-        ("*", "Is it to integrate configuration files"): "是否为整合配置文件"
+        ("*", "Is it to integrate configuration files"): "是否为整合配置文件",
+        ("*", "Whether to merge meshes in the same group"): "是否合并相同组的网格",
     }
 }
 

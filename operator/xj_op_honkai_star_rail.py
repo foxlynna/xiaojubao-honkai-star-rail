@@ -4,7 +4,7 @@ from bpy.types import Operator, Image
 from bpy.app.translations import pgettext_iface as _
 import os
 import json
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from ..utils import MaterialUtils
 
 class XJ_OP_HonkaiStarRail(Operator):
@@ -34,7 +34,7 @@ class XJ_OP_HonkaiStarRail(Operator):
             self.import_material(blend_file_path)
             self.import_light_vector_empty_obj()
             # self.import_light_direction_collection(blend_file_path)
-            
+            json_obj : Optional[Dict[str, Any]] = None
             # is preset
             if context.scene.xj_honkai_star_rail_is_preset:
                 json_obj = MaterialUtils.load_first_script_as_json(blend_file_path)
@@ -43,7 +43,19 @@ class XJ_OP_HonkaiStarRail(Operator):
                 self.import_textures_from_blend(blend_file_path)
                 self.assign_materials_from_preset(json_obj)
             else:    
-                self.assign_materials_from_json(context.scene.xj_honkai_star_rail_role_json_file_path, context.scene.xj_honkai_star_rail_material_path)
+                json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
+                if not json_obj:
+                    raise Exception("Failed to load preset json file")  
+                self.assign_materials_from_json(json_obj, context.scene.xj_honkai_star_rail_material_path)
+            if context.scene.xj_honkai_star_rail_is_join_mesh:
+                # join mesh
+                self.join_group_mesh(json_obj)
+            # emmison material
+            self.modify_emission_material(json_obj.get('emmision', []))
+            # eyeshadow
+            self.modify_eyeshadow_material(json_obj.get('eyeshadow', []))
+            # head origin constraint
+            self.set_child_of_constraints_to_heads()
             
             return {'FINISHED'}
         else:
@@ -816,8 +828,7 @@ class XJ_OP_HonkaiStarRail(Operator):
                                self.material_add_tex(obj, material_name, None, key, role_name)
                             break            
     
-    def assign_materials_from_json(self, json_file_path, tex_file_path):
-        json_obj = MaterialUtils.load_role_json_obj(json_file_path)
+    def assign_materials_from_json(self, json_obj: Dict[str, Any], tex_file_path: str) -> None:
         material_map = json_obj['material_map']
         role_name = json_obj["role_name"]
         # loop selected objects
@@ -835,7 +846,152 @@ class XJ_OP_HonkaiStarRail(Operator):
                             if material_name:
                                self.material_add_tex(obj, material_name, tex_file_path, key, role_name)
                             break
+                        
+    def join_group_mesh(self, json_obj: Dict[str, Any]) -> None:
+        """join same group mesh"""
+        selected_meshes = [obj for obj in bpy.context.selected_objects if obj.type == 'MESH']
+        mesh_groups = {}
+        # loop material_map
+        for material_key, mesh_names in json_obj['material_map'].items():
+            matched_meshes = []
+            if len(mesh_names) > 1:
+                for mesh in selected_meshes:
+                    parts = mesh.name.split('_')
+                    if(len(parts) > 1):
+                        mesh_name_after = parts[1]
+                        if any(name == mesh_name_after for name in mesh_names):
+                            matched_meshes.append(mesh)
+                # join meshes
+                if matched_meshes:
+                    mesh_groups[material_key] = matched_meshes
+        # After collecting all groups, merge them
+        for name, meshes in mesh_groups.items():
+            self.merge_meshes(meshes, name)
+        
+    def merge_meshes(self, meshes: List[bpy.types.Object], name: str):
+        """join meshes"""
+        # clear selection
+        bpy.ops.object.select_all(action='DESELECT')
+        # reselect meshes
+        for mesh in meshes:
+            mesh.select_set(True)        
+        
+        bpy.context.view_layer.objects.active = meshes[0]  
+        for mesh in meshes[1:]:  
+            mesh.select_set(True)
+        bpy.ops.object.join()
+        bpy.context.object.name = name
+    
+    def set_child_of_constraints_to_heads(self, head_origin_name: str = 'Head Origin') -> None:
+        """set child of constraints to heads"""
+        # Find the 'Head Origin' empty object in the scene
+        head_origin = bpy.data.objects.get(head_origin_name)
+        if not head_origin:
+            print("Error: No object named 'Head Origin' found.")
+            return
 
+        # calculate the number of armatures in the scene
+        armatures = [obj for obj in bpy.data.objects if obj.type == 'ARMATURE']
+        if len(armatures) > 1:
+            print("Error: More than one armature found in the scene. Exiting without setting constraints.")
+            return
+
+        # if there's only one armature in the scene, continue
+        if armatures:
+            armature = armatures[0]
+            # 约束 find or add 'Child Of' constraint
+            child_of_constraint = next((c for c in head_origin.constraints if c.type == 'CHILD_OF' and not c.target), None)
+            if not child_of_constraint:
+                child_of_constraint = head_origin.constraints.new(type='CHILD_OF')
+            # set
+            child_of_constraint.target = armature
+            
+            if '頭' in armature.data.bones:
+                child_of_constraint.subtarget = '頭'
+                # set inverse
+                bpy.context.view_layer.objects.active = head_origin
+                head_origin.select_set(True)
+                bpy.ops.constraint.childof_set_inverse(constraint="Child Of", owner='OBJECT')
+                # move head origin to 頭 location
+                head_bone = armature.data.bones['頭']
+                head_origin.location = armature.matrix_world @ head_bone.head_local
+                print(f"Constraint set successfully for armature {armature.name}.")
+            else:
+                print(f"No bone named '頭' found in armature {armature.name}.")
+    
+    def modify_emission_material(self, material_names: List[str]) -> None:
+        """
+        Modifies specified materials to connect a texture node's color output to the Principled BSDF's emission input.
+        Args:
+        material_names (List[str]): List of material names to be modified.
+        """
+        # Iterate over the list of material names provided
+        for mat_name in material_names:
+            # Attempt to retrieve the material by name
+            material = bpy.data.materials.get(mat_name)
+            
+            # Check if the material exists and uses nodes
+            if material and material.use_nodes:
+                nodes = material.node_tree.nodes
+                links = material.node_tree.links
+
+                # Try to find the 'Mmd Base Tex' texture node and the 'Principled BSDF' node
+                texture_node = next((node for node in nodes if node.type == 'TEX_IMAGE'), None)
+                bsdf_node = next((node for node in nodes if node.type == 'BSDF_PRINCIPLED'), None)
+
+                # Ensure both nodes were found
+                if texture_node and bsdf_node:
+                    # Check if the connection already exists
+                    already_connected = any(link.to_node == bsdf_node and link.from_node == texture_node and link.from_socket == texture_node.outputs['Color'] and link.to_socket == bsdf_node.inputs['Emission'] for link in links)
+
+                    # If not already connected, create a new link
+                    if not already_connected:
+                        color_output = texture_node.outputs['Color']  # Assuming the texture node has an output named 'Color'
+                        emission_input = bsdf_node.inputs['Emission']  # Assuming BSDF has an input named 'Emission'
+                        links.new(color_output, emission_input)
+                        print(f"Connected texture color from '{texture_node.name}' to emission of '{bsdf_node.name}' in material '{mat_name}'")
+                else:
+                    print(f"Texture node or Principled BSDF node not found in material '{mat_name}'")
+            else:
+                print(f"Material '{mat_name}' not found or does not use nodes.")
+    
+    def modify_eyeshadow_material(self, material_names: List[str]) -> None:
+        """
+        Modifies eyeshadow materials to ensure they have a Transparency BSDF node set to a specific color and connected to the material output.
+        
+        Args:
+            material_names (List[str]): List of material names to be modified.
+        """
+        # Iterate over the provided material names
+        for mat_name in material_names:
+            # Attempt to retrieve the material by name
+            material = bpy.data.materials.get(mat_name)
+            
+            # Check if the material exists and uses nodes
+            if material and material.use_nodes:
+                nodes = material.node_tree.nodes
+                links = material.node_tree.links
+
+                # Try to find a Transparent BSDF node by type
+                trans_bsdf_node = next((node for node in nodes if node.type == 'BSDF_TRANSPARENT'), None)
+
+                # If no Transparent BSDF node exists, create one
+                if not trans_bsdf_node:
+                    trans_bsdf_node = nodes.new(type='ShaderNodeBsdfTransparent')
+                    trans_bsdf_node.location = (300, 300)  # Position the new node slightly apart
+
+                # Set the color and alpha of the Transparent BSDF node
+                trans_bsdf_node.inputs['Color'].default_value = (0.031, 0.031, 0.031, 1)  # RGB and Alpha
+
+                # Find the material output node
+                material_output_node = next((node for node in nodes if node.type == 'OUTPUT_MATERIAL'), None)
+                if material_output_node:
+                    # Connect the Transparent BSDF node to the Surface input of the Material Output node
+                    links.new(trans_bsdf_node.outputs['BSDF'], material_output_node.inputs['Surface'])
+                    print(f"Modified material '{mat_name}' with a Transparent BSDF node.")
+            else:
+                print(f"Material '{mat_name}' not found or does not use nodes.")
+        
 
 class XJ_OP_HonkaiStarRailLightModifier(Operator):
     """add light vector modifier"""
@@ -929,7 +1085,7 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
 
     def execute(self, context):
         blend_file_path = context.scene.xj_honkai_star_rail_blend_file_path
-        # 获取所有选中的网格对象
+        # get all selected mesh objects
         selected_objects = [obj for obj in context.selected_objects if obj.type == 'MESH']
         json_obj = None
         # is preset
@@ -939,7 +1095,7 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
             json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
         material_map = json_obj['material_map']
         
-        # 遍历所有选中的网格对象
+        # 遍历所有选中的网格对象 iterate over selected mesh objects
         for obj in selected_objects:
             if obj.type == 'MESH':
                 # mesh_name_after
@@ -953,8 +1109,17 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
                             material_name = self.TEX_OUTLINE_MATERIAL_MAP.get(key)
                             if material_name:
                                self.material_add_outline(obj, material_name)
+                            else:
+                                self.report({'WARNING'}, f"Mesh '{obj.name}' not found in material map.")
                             break
-            
+                else: # not found mesh_name_after, use joined name: face/body/body1/body2/hair
+                    obj_name = obj.name
+                    material_name = self.TEX_OUTLINE_MATERIAL_MAP.get(obj_name)
+                    if material_name:
+                        self.material_add_outline(obj, material_name)
+                    else:
+                        self.report({'WARNING'}, f"Mesh '{obj_name}' not found in material map.")
+                    
 
         return {'FINISHED'}
     
