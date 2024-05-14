@@ -35,18 +35,17 @@
 
    - Festivity's Honkai: Star Rail Shader，地址：https://github.com/festivities/Blender-StellarToon
 
-   - 使用这个，MMD修复版：[StellarToon-MMD-fix.blend](https://github.com/foxlynna/xiaojubao-honkai-star-rail/releases/tag/0.3.0)
+   - 克里斯提亚娜大佬的汉化修复，下载地址：https://pan.baidu.com/s/1JKwny2CkdfSmqR1jT51BiQ?from=init&pwd=26JU  **用这个** 
 
+
+   - 补一个下载链接：[StellarToon星穹铁道中文修复版V3.blend](https://1drv.ms/u/s!AihGDbeGMmo3j5kJijuoFCh-PkxHtw?e=l2hFGb) 提取码 `xiaojubao`
 
 
 2. 此插件需要的**角色配置文件**：
 
    - [xiaojubao插件-星穹铁道-角色配置文件夹2024-05-08.zip](https://1drv.ms/u/s!AihGDbeGMmo3j5kQuY8A1PBqbN1g5Q?e=VVNO3Z) 提取码：`%Tme5`（**包含55个角色的配置文件，都是我一个一个配置的**）
+
    - 下文有如何制作配置文件的教程，没有的可以自己配一下(≧﹏ ≦) 
-
-3. **0.3.0版本可使用整合配置文件，无需json配置文件与本地贴图**
-
-
 
 ⭐ 如果你觉得有用的话，可以给这个仓库点个 **Star**  ⭐
 

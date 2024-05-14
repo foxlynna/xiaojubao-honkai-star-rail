@@ -273,7 +273,7 @@ class XJ_OP_HonkaiStarRail(Operator):
     def get_texture_image(self, image_name, tex_file_path) -> Image:
         """get_texture_image"""
         image = bpy.data.images.get(image_name)
-        if image and os.path.isfile(bpy.path.abspath(image.filepath)):
+        if image and (image.packed_file or os.path.isfile(bpy.path.abspath(image.filepath))):
             return image
         else:
             image = bpy.data.images.load(os.path.join(tex_file_path, image_name))
