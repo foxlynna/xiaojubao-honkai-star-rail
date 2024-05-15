@@ -701,7 +701,7 @@ class XJ_OP_HonkaiStarRail(Operator):
                     body2_lightmap_texture = file_name
         # tex_file_path is empty, is preset
         if not tex_file_path:
-            for image in os.listdir(tex_file_path):
+            for image in bpy.data.images:
                 file_name = image.name
                 if "Body2_Color" in file_name and file_name.endswith(".png"):
                     body2_color_texture = file_name
