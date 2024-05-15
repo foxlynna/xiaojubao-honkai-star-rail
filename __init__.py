@@ -9,8 +9,8 @@ bl_info = {
     "category": "UI",
     "description": "小橘包-星穹铁道",
     "author": "何以千奈的橘子",
-    "version": (0, 3, 0),
-    "honkai_star_rail_version": (0, 3, 0),
+    "version": (0, 3, 2),
+    "honkai_star_rail_version": (0, 3, 2),
     "location": "View3D > Sidebar > XiaoJu Tab"
 }
 
