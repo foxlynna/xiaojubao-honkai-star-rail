@@ -66,6 +66,9 @@ class XJ_HonkaiStarRail_UI():
         row.prop(scene, "xj_honkai_star_rail_is_preset", text=_("Is it to integrate configuration files"))
         
         row = box.row()
+        row.operator("xj.honkai_star_rail_run_entire_setup", text=_("Run Entire Setup"), icon="BLENDER")
+        
+        row = box.row()
         row.enabled = not scene.xj_honkai_star_rail_is_preset
         row.prop(scene, "xj_honkai_star_rail_material_path", text=_("Texture file path"))
         

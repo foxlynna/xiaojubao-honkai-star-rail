@@ -26,6 +26,8 @@ translation_dict = {
         ("*", "Is all in configs"): "是否为整合配置文件",
         ("*", "Is it to integrate configuration files"): "是否为整合配置文件",
         ("*", "Whether to merge meshes in the same group"): "是否合并相同组的网格",
+        ("Operator", "Run Entire Setup"): "一键安装MMD模型",
+        ("*", "Run Entire Setup for MMD Model"): "一键安装MMD模型整合配置",
     }
 }
 

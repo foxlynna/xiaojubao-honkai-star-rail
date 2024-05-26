@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import bpy
-from bpy.types import Operator, Image
+from bpy.types import Operator, Image, Mesh, Material, MaterialSlot
 from bpy.app.translations import pgettext_iface as _
+from bpy.app.handlers import persistent
+from bpy.app.timers import register
 import os
 import json
+import time
 from typing import Optional, Dict, Any, List
 from ..utils import MaterialUtils
 
@@ -235,21 +238,21 @@ class XJ_OP_HonkaiStarRail(Operator):
         print(image_map)
         return image_map
     
-    def material_add_tex(self, mesh: bpy.types.Mesh, material_name, tex_file_path, type, role_name, mesh_material_name, slot: bpy.types.MaterialSlot):
+    def material_add_tex(self, mesh: Mesh, adding_material_name, tex_file_path, type, role_name, mesh_material_name, slot: MaterialSlot):
         """replace material
 
         Args:
             mesh (mesh): mesh
-            material_name (str): adding material name
+            adding_material_name (str): adding material name
             tex_file_path (str): tex_file_path
             type (str): type
             role_name (str): role_name
             mesh_name_after (str): mesh_material_name
         """
         # find material
-        mat = bpy.data.materials.get(material_name)
+        mat = bpy.data.materials.get(adding_material_name)
         if not mat:
-            print(f"No material found with the name '{material_name}'")
+            self.report({'ERROR'}, f"No material found with the name '{adding_material_name}'")
             return
         # generate material if not exist
         new_mat_name = role_name + "_" + type
@@ -270,10 +273,7 @@ class XJ_OP_HonkaiStarRail(Operator):
             self.get_body2_material(new_mat, tex_file_path)    
         elif type == "body":    
             self.get_body_material(new_mat, tex_file_path)
-        # rename material
-        # new_mat = new_mat.copy()
-        # new_mat.name = new_mat_name + "_" + mesh_material_name
-        # replace material
+            
         slot.material = new_mat
     
     def get_texture_image(self, image_name, tex_file_path) -> Image:
@@ -831,10 +831,12 @@ class XJ_OP_HonkaiStarRail(Operator):
                         for key, items in material_map.items():
                             if mesh_material_name in items:
                                 # get adding material name
-                                material_name = self.TEX_MATERIAL_MAP.get(key)
-                                if material_name:
-                                    self.material_add_tex(obj, material_name, None, key, role_name, mesh_material_name, slot)
-                                    break            
+                                adding_material_name = self.TEX_MATERIAL_MAP.get(key)
+                                if adding_material_name:
+                                    self.material_add_tex(obj, adding_material_name, None, key, role_name, mesh_material_name, slot)
+                                    break
+                # set mesh object slot default index
+                obj.active_material_index = 0
     
     def assign_materials_from_json(self, json_obj: Dict[str, Any], tex_file_path: str) -> None:
         material_map = json_obj['material_map']
@@ -1110,7 +1112,7 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
                 self.material_add_outline(obj, json_obj["role_name"])
         return {'FINISHED'}
     
-    def material_add_outline(self, obj: bpy.types.Mesh, role_name: str):
+    def material_add_outline(self, obj: Mesh, role_name: str):
         geo_node_mod = None
         # loop modifiers
         for mod in obj.modifiers:
@@ -1179,4 +1181,45 @@ class XJ_OP_HonkaiStarRailOutlineRemove(Operator):
                         obj.modifiers.remove(mod)
                         break
 
-        return {'FINISHED'}            
+        return {'FINISHED'}
+
+
+class XJ_OP_HonkaiStarRailRunEntireSetup(Operator):
+    """run entire setup"""
+    bl_idname = "xj.honkai_star_rail_run_entire_setup"
+    bl_label = "Run Entire Setup"
+    bl_description = _("Run Entire Setup for MMD Model")
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        # Step 1: Start importing the MMD model
+        bpy.ops.mmd_tools.import_model('INVOKE_DEFAULT')
+        
+        # Step 2: Set up a timer to check for the model import completion
+        register(self.check_import_completion)
+       
+        return {'FINISHED'}
+    
+    def check_import_completion(self):
+        # Check if the model has been imported by looking for specific objects
+        if self.is_model_imported():
+            # Step 3: Convert the materials
+            bpy.ops.mmd_tools.convert_materials()
+            
+            # Step 4: all processes
+            bpy.ops.xj.honkai_star_rail_add()
+            bpy.ops.xj.honkai_star_rail_add_light_modifier()
+            bpy.ops.xj.honkai_star_rail_outline_add()
+            
+            # Import completed and operations finished
+            return None  # Returning None stops the timer
+            
+        # If the model is not imported yet, check again after 0.5 seconds
+        return 0.5
+    
+    def is_model_imported(self):
+        # Check for specific objects that indicate the model has been imported
+        for obj in bpy.context.selected_objects:
+            if obj.type == 'MESH' and hasattr(obj, 'mmd_root'):
+                return True
+        return False

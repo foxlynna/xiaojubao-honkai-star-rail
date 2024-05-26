@@ -188,25 +188,23 @@ class MaterialUtils:
         """
         first_json_text_name = None
         # check json config exists
-        json_texts = [text.name for text in bpy.data.texts if text.name.endswith(".json")]
-        if not json_texts:
-            try:
-                with bpy.data.libraries.load(blend_filepath, link=False) as (data_from, data_to):
-                    if data_from.texts:
-                        json_texts = [text for text in data_from.texts if text.endswith(".json")]
-                        if not json_texts:
-                            print(f"json text not found in {blend_filepath}")
-                            return None
-                        first_json_text_name = json_texts[0]
-                        data_to.texts = [first_json_text_name]
-                    else:
-                        print("blend file has no text data")
+        json_texts_exists = [text.name for text in bpy.data.texts if text.name.endswith(".json")]
+        try:
+            with bpy.data.libraries.load(blend_filepath, link=False) as (data_from, data_to):
+                if data_from.texts:
+                    json_texts = [text for text in data_from.texts if text.endswith(".json")]
+                    if not json_texts:
+                        print(f"json text not found in {blend_filepath}")
                         return None
-            except Exception as e:
-                print(f"load blend file error：{e}")
-                return None
-        else:
-            first_json_text_name = json_texts[0]
+                    first_json_text_name = json_texts[0]
+                    if first_json_text_name not in json_texts_exists:
+                        data_to.texts = [first_json_text_name]
+                else:
+                    print("blend file has no text data")
+                    return None
+        except Exception as e:
+            print(f"load blend file error：{e}")
+            return None
         
         # get first text data
         imported_text = bpy.data.texts[first_json_text_name]
