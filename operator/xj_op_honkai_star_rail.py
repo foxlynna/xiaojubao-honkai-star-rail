@@ -47,9 +47,6 @@ class XJ_OP_HonkaiStarRail(Operator):
                 if not json_obj:
                     raise Exception("Failed to load preset json file")  
                 self.assign_materials_from_json(json_obj, context.scene.xj_honkai_star_rail_material_path)
-            if context.scene.xj_honkai_star_rail_is_join_mesh:
-                # join mesh
-                self.join_group_mesh(json_obj)
             # emmison material
             self.modify_emission_material(json_obj.get('emmision', []))
             # eyeshadow
@@ -238,8 +235,17 @@ class XJ_OP_HonkaiStarRail(Operator):
         print(image_map)
         return image_map
     
-    def material_add_tex(self, mesh, material_name, tex_file_path, type, role_name):
-        """material_add_tex"""
+    def material_add_tex(self, mesh: bpy.types.Mesh, material_name, tex_file_path, type, role_name, mesh_material_name, slot: bpy.types.MaterialSlot):
+        """replace material
+
+        Args:
+            mesh (mesh): mesh
+            material_name (str): adding material name
+            tex_file_path (str): tex_file_path
+            type (str): type
+            role_name (str): role_name
+            mesh_name_after (str): mesh_material_name
+        """
         # find material
         mat = bpy.data.materials.get(material_name)
         if not mat:
@@ -264,11 +270,11 @@ class XJ_OP_HonkaiStarRail(Operator):
             self.get_body2_material(new_mat, tex_file_path)    
         elif type == "body":    
             self.get_body_material(new_mat, tex_file_path)
-        # mesh add material
-        if mesh.data.materials:
-            mesh.data.materials[0] = new_mat
-        else:
-            mesh.data.materials.append(new_mat)
+        # rename material
+        # new_mat = new_mat.copy()
+        # new_mat.name = new_mat_name + "_" + mesh_material_name
+        # replace material
+        slot.material = new_mat
     
     def get_texture_image(self, image_name, tex_file_path) -> Image:
         """get_texture_image"""
@@ -815,18 +821,20 @@ class XJ_OP_HonkaiStarRail(Operator):
         # loop selected objects
         for obj in bpy.context.selected_objects:
             if obj.type == 'MESH':
-                # mesh_name_after
-                parts = obj.name.split('_')
-                if len(parts) > 1:
-                    mesh_name_after = parts[1]
-                    # find mesh_name_after type in material_map
-                    for key, items in material_map.items():
-                        if mesh_name_after in items:
-                            # get material name
-                            material_name = self.TEX_MATERIAL_MAP.get(key)
-                            if material_name:
-                               self.material_add_tex(obj, material_name, None, key, role_name)
-                            break            
+                # Loop through all material slots
+                for slot in obj.material_slots:
+                    mesh_material = slot.material
+                    if mesh_material:
+                        mesh_material_name = mesh_material.name
+                        print(f"Object: {obj.name}, Material Slot: {slot.name}, Material: {mesh_material_name}")                
+                        # find mesh_material_name type in material_map
+                        for key, items in material_map.items():
+                            if mesh_material_name in items:
+                                # get adding material name
+                                material_name = self.TEX_MATERIAL_MAP.get(key)
+                                if material_name:
+                                    self.material_add_tex(obj, material_name, None, key, role_name, mesh_material_name, slot)
+                                    break            
     
     def assign_materials_from_json(self, json_obj: Dict[str, Any], tex_file_path: str) -> None:
         material_map = json_obj['material_map']
@@ -834,18 +842,20 @@ class XJ_OP_HonkaiStarRail(Operator):
         # loop selected objects
         for obj in bpy.context.selected_objects:
             if obj.type == 'MESH':
-                # mesh_name_after
-                parts = obj.name.split('_')
-                if len(parts) > 1:
-                    mesh_name_after = parts[1]
-                    # find mesh_name_after type in material_map
-                    for key, items in material_map.items():
-                        if mesh_name_after in items:
-                            # get material name
-                            material_name = self.TEX_MATERIAL_MAP.get(key)
-                            if material_name:
-                               self.material_add_tex(obj, material_name, tex_file_path, key, role_name)
-                            break
+                # Loop through all material slots
+                for slot in obj.material_slots:
+                    mesh_material = slot.material
+                    if mesh_material:
+                        mesh_material_name = mesh_material.name
+                        print(f"Object: {obj.name}, Material Slot: {slot.name}, Material: {mesh_material_name}")                
+                        # find mesh_material_name type in material_map
+                        for key, items in material_map.items():
+                            if mesh_material_name in items:
+                                # get material name
+                                adding_material_name = self.TEX_MATERIAL_MAP.get(key)
+                                if adding_material_name:
+                                    self.material_add_tex(obj, adding_material_name, tex_file_path, key, role_name, mesh_material_name, slot)
+                                break
                         
     def join_group_mesh(self, json_obj: Dict[str, Any]) -> None:
         """join same group mesh"""
@@ -1093,37 +1103,14 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
             json_obj = MaterialUtils.load_first_script_as_json(blend_file_path)
         else:
             json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
-        material_map = json_obj['material_map']
         
-        # 遍历所有选中的网格对象 iterate over selected mesh objects
+        # iterate over selected mesh objects
         for obj in selected_objects:
             if obj.type == 'MESH':
-                # mesh_name_after
-                parts = obj.name.split('_')
-                if len(parts) > 1:
-                    mesh_name_after = parts[1]
-                    # find mesh_name_after type in material_map
-                    for key, items in material_map.items():
-                        if mesh_name_after in items:
-                            # get material name
-                            material_name = self.TEX_OUTLINE_MATERIAL_MAP.get(key)
-                            if material_name:
-                               self.material_add_outline(obj, material_name)
-                            else:
-                                self.report({'WARNING'}, f"Mesh '{obj.name}' not found in material map.")
-                            break
-                else: # not found mesh_name_after, use joined name: face/body/body1/body2/hair
-                    obj_name = obj.name
-                    material_name = self.TEX_OUTLINE_MATERIAL_MAP.get(obj_name)
-                    if material_name:
-                        self.material_add_outline(obj, material_name)
-                    else:
-                        self.report({'WARNING'}, f"Mesh '{obj_name}' not found in material map.")
-                    
-
+                self.material_add_outline(obj, json_obj["role_name"])
         return {'FINISHED'}
     
-    def material_add_outline(self, obj, material_name):
+    def material_add_outline(self, obj: bpy.types.Mesh, role_name: str):
         geo_node_mod = None
         # loop modifiers
         for mod in obj.modifiers:
@@ -1144,20 +1131,28 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
         
         # set inputs
         input_thickness = node_group.inputs.get("Outline Thickness")
-        input_mask_material = node_group.inputs.get("Outline 1 Mask")
-        input_outline_material = node_group.inputs.get("Outline 1 Material")
-        
         # set outline thickness
         if input_thickness:
             geo_node_mod[input_thickness.identifier] = bpy.context.scene.xj_honkai_star_rail_outline_thickness
-
-        # set input_mask_material
-        if input_mask_material and obj.material_slots:
-            geo_node_mod[input_mask_material.identifier] = obj.material_slots[0].material
-
-        # set input_outline_material
-        if input_outline_material:
-            geo_node_mod[input_outline_material.identifier] = bpy.data.materials.get(material_name)
+            
+        for index, key in enumerate(self.TEX_OUTLINE_MATERIAL_MAP.keys()):
+            mask_material_name = role_name + "_" + key
+            mask_material = bpy.data.materials.get(mask_material_name)
+            if not mask_material:
+                self.report({'WARNING'}, f"Material '{mask_material_name}' not found.")
+                continue
+            
+            outline_material_name = self.TEX_OUTLINE_MATERIAL_MAP[key]
+            outline_material = bpy.data.materials.get(outline_material_name)
+            
+            if outline_material:
+                # Set Outline Mask and Material
+                input_mask_material = node_group.inputs.get(f"Outline {index + 1} Mask")
+                input_outline_material = node_group.inputs.get(f"Outline {index + 1} Material")
+                if input_mask_material:
+                    geo_node_mod[input_mask_material.identifier] = mask_material
+                if input_outline_material:
+                    geo_node_mod[input_outline_material.identifier] = outline_material
 
 class XJ_OP_HonkaiStarRailOutlineRemove(Operator):
     """remove outline"""
