@@ -4,11 +4,15 @@ from bpy.types import Operator, Image, Mesh, Material, MaterialSlot
 from bpy.app.translations import pgettext_iface as _
 from bpy.app.handlers import persistent
 from bpy.app.timers import register
+import bmesh
 import os
 import json
 import time
 from typing import Optional, Dict, Any, List
 from ..utils import MaterialUtils
+
+# constants
+NAME_OF_VERTEX_COLORS_INPUT = 'Input_3'
 
 class XJ_OP_HonkaiStarRail(Operator):
     """add honkai star rail material"""
@@ -56,7 +60,8 @@ class XJ_OP_HonkaiStarRail(Operator):
             self.modify_eyeshadow_material(json_obj.get('eyeshadow', []))
             # head origin constraint
             self.set_child_of_constraints_to_heads()
-            
+            # gooengine_base_render_set
+            MaterialUtils.set_gooengine_base_render_set()
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
@@ -1109,6 +1114,7 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
         # iterate over selected mesh objects
         for obj in selected_objects:
             if obj.type == 'MESH':
+                self.paint_vertex_color(obj.data)
                 self.material_add_outline(obj, json_obj["role_name"])
         return {'FINISHED'}
     
@@ -1130,6 +1136,10 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
             return {'CANCELLED'}
         
         geo_node_mod.node_group = node_group
+        # vertex color
+        input_color = node_group.inputs.get("Vertex Colors")
+        if input_color:
+            self.set_up_modifier_vertex_color(geo_node_mod, obj)
         
         # set inputs
         input_thickness = node_group.inputs.get("Outline Thickness")
@@ -1155,6 +1165,48 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
                     geo_node_mod[input_mask_material.identifier] = mask_material
                 if input_outline_material:
                     geo_node_mod[input_outline_material.identifier] = outline_material
+    
+    def set_up_modifier_vertex_color(self, modifier, mesh):
+        if modifier[f'{NAME_OF_VERTEX_COLORS_INPUT}_use_attribute'] == 0:
+            with bpy.context.temp_override(active_object=bpy.data.objects[mesh.name]):
+                bpy.context.view_layer.objects.active = bpy.context.active_object
+
+                if bpy.app.version >= (4,0,0):
+                    bpy.ops.object.geometry_nodes_input_attribute_toggle(
+                        input_name=NAME_OF_VERTEX_COLORS_INPUT, 
+                        modifier_name=modifier.name
+                    )
+                else:
+                    bpy.ops.object.geometry_nodes_input_attribute_toggle(
+                        prop_path=f"[\"{NAME_OF_VERTEX_COLORS_INPUT}_use_attribute\"]", 
+                        modifier_name=modifier.name
+                    )
+
+        modifier[f'{NAME_OF_VERTEX_COLORS_INPUT}_attribute_name'] = 'Col'
+        
+    def paint_vertex_color(self, mesh: Mesh):
+        if not isinstance(mesh, Mesh):
+            print("Provided object is not a Mesh")
+            return
+        # check if vertex color layer exists
+        color_layer = mesh.vertex_colors.get('Col')
+        if not color_layer:
+            # if not, create it
+            color_layer = mesh.vertex_colors.new(name='Col')
+            print("Created new vertex color layer 'Col'")
+        else:
+            print("Using existing vertex color layer 'Col'")
+
+        # set color value
+        color_value = (1, 0.502, 0.502, 0.5)
+        
+        color_layer_index = 0
+        for poly in mesh.polygons:
+            for indice in poly.loop_indices:
+                color_layer.data[color_layer_index].color = (1, 0.502, 0.502, 0.5)
+                color_layer_index += 1
+        print(f"Set vertex colors to {color_value} in layer 'Col'")
+        
 
 class XJ_OP_HonkaiStarRailOutlineRemove(Operator):
     """remove outline"""

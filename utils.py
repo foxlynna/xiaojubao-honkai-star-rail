@@ -215,3 +215,12 @@ class MaterialUtils:
         except json.JSONDecodeError as e:
             print(f"parse json error：{e}")
             return None
+    
+    @staticmethod
+    def set_gooengine_base_render_set():
+        """gooengine_base_render_set"""
+        # view_transform: Standard
+        bpy.context.scene.view_settings.view_transform = 'Standard'
+        # Screen Space Refraction: On
+        bpy.context.scene.eevee.use_ssr = True
+        bpy.context.scene.eevee.use_ssr_refraction = True
