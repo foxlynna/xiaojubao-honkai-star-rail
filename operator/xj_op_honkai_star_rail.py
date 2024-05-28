@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import bpy
-from bpy.types import Operator, Image, Mesh, Material, MaterialSlot
+from bpy.types import Operator, Image, Object, Mesh, Material, MaterialSlot
 from bpy.app.translations import pgettext_iface as _
 from bpy.app.handlers import persistent
 from bpy.app.timers import register
@@ -23,7 +23,14 @@ class XJ_OP_HonkaiStarRail(Operator):
     
     LIGHT_VECTOR_NODE_NAME = "Light Vectors"
     STELLAR_TOON_OUTLINE_NODE_NAME = "StellarToon - Outlines GN"
-    STELLAR_MATERIAL_NAME = ["StellarToon - Base Outlines", "StellarToon - Base", "StellarToon - Hair", "StellarToon - Hair Outlines","StellarToon - Weapon","StellarToon - Weapon Outlines", "StellarToon - Face", "StellarToon - Face Outlines"]
+    STELLAR_MATERIAL_NAME = ["StellarToon - Base Outlines", 
+                             "StellarToon - Base", 
+                             "StellarToon - Hair", 
+                             "StellarToon - Hair Outlines",
+                             "StellarToon - Weapon",
+                             "StellarToon - Weapon Outlines", 
+                             "StellarToon - Face", 
+                             "StellarToon - Face Outlines"]
     # tex and material map
     TEX_MATERIAL_MAP = {
         "face": "StellarToon - Face",
@@ -278,7 +285,10 @@ class XJ_OP_HonkaiStarRail(Operator):
             self.get_body2_material(new_mat, tex_file_path)    
         elif type == "body":    
             self.get_body_material(new_mat, tex_file_path)
-            
+        # fix face outline, only face material name is {role_name}_face, other face material name is {role_name}_face_{material_name}
+        if type == "face" and mesh_material_name not in ["脸", "臉", "顏", "颜"]:
+            new_mat = new_mat.copy()
+            new_mat.name = role_name + "_" + type + "_" + mesh_material_name
         slot.material = new_mat
     
     def get_texture_image(self, image_name, tex_file_path) -> Image:
@@ -1090,6 +1100,12 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
     node_group_name = "StellarToon - Outlines GN"
     # outline modifier name
     outline_modifier_name = "XJ-StellarToon - Outlines GN"
+    # outline material
+    OUTLINE_MATERIAL = [
+        "StellarToon - Face Outlines",
+        "StellarToon - Hair Outlines",
+        "StellarToon - Base Outlines"
+    ]
     # tex and outline material map
     TEX_OUTLINE_MATERIAL_MAP = {
         "face": "StellarToon - Face Outlines",
@@ -1097,6 +1113,74 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
         "body": "StellarToon - Base Outlines",
         "body1": "StellarToon - Base Outlines",
         "body2": "StellarToon - Base Outlines",
+    }
+    OUTLINE_COLOR = {
+        "StellarToon - Face Outlines": {
+            "_OutlineColor": {
+                "r": 0.4528302,
+                "g": 0.3268067,
+                "b": 0.33669087,
+                "a": 1.0
+            }
+        },
+        "StellarToon - Hair Outlines": {
+            "_OutlineColor0": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 1.0
+            }
+        },
+        "StellarToon - Base Outlines": {
+            "_OutlineColor0": {
+                "r": 0.4509804,
+                "g": 0.3254902,
+                "b": 0.3372549,
+                "a": 1.0
+            },
+            "_OutlineColor1": {
+                "r": 0.3033755,
+                "g": 0.28511038,
+                "b": 0.4056604,
+                "a": 1.0
+            },
+            "_OutlineColor2": {
+                "r": 0.2264151,
+                "g": 0.15699537,
+                "b": 0.15699537,
+                "a": 1.0
+            },
+            "_OutlineColor3": {
+                "r": 0.22365607,
+                "g": 0.21555711,
+                "b": 0.26415092,
+                "a": 1.0
+            },
+            "_OutlineColor4": {
+                "r": 0.3301887,
+                "g": 0.2289516,
+                "b": 0.23495466,
+                "a": 1.0
+            },
+            "_OutlineColor5": {
+                "r": 0.27358484,
+                "g": 0.17163578,
+                "b": 0.20986667,
+                "a": 1.0
+            },
+            "_OutlineColor6": {
+                "r": 0.23673905,
+                "g": 0.26965,
+                "b": 0.3773585,
+                "a": 1.0
+            },
+            "_OutlineColor7": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        }
     }
     
 
@@ -1114,8 +1198,10 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
         # iterate over selected mesh objects
         for obj in selected_objects:
             if obj.type == 'MESH':
-                self.paint_vertex_color(obj.data)
+                # self.paint_vertex_color(obj.data)
                 self.material_add_outline(obj, json_obj["role_name"])
+                # append outline material
+                self.set_outline_mat_default_value(obj)
         return {'FINISHED'}
     
     def material_add_outline(self, obj: Mesh, role_name: str):
@@ -1137,9 +1223,9 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
         
         geo_node_mod.node_group = node_group
         # vertex color
-        input_color = node_group.inputs.get("Vertex Colors")
-        if input_color:
-            self.set_up_modifier_vertex_color(geo_node_mod, obj)
+        # input_color = node_group.inputs.get("Vertex Colors")
+        # if input_color:
+        #     self.set_up_modifier_vertex_color(geo_node_mod, obj)
         
         # set inputs
         input_thickness = node_group.inputs.get("Outline Thickness")
@@ -1206,6 +1292,32 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
                 color_layer.data[color_layer_index].color = (1, 0.502, 0.502, 0.5)
                 color_layer_index += 1
         print(f"Set vertex colors to {color_value} in layer 'Col'")
+        
+    def set_outline_mat_default_value(self, obj: Object):
+        """Add outline materials to the object's material slots"""
+        for mat_name in self.OUTLINE_MATERIAL:
+            if not any(slot.material and slot.material.name == mat_name for slot in obj.material_slots):
+                if bpy.data.materials.get(mat_name):
+                    obj.data.materials.append(bpy.data.materials[mat_name])
+        
+        # Set the values for the node groups
+        for mat_name in self.OUTLINE_MATERIAL:
+            mat = bpy.data.materials.get(mat_name)
+            if mat and mat.node_tree:
+                nodes = mat.node_tree.nodes
+                for node in nodes:
+                    if node.type == 'GROUP' and node.name.startswith("Group.006"):
+                        if mat_name == "StellarToon - Face Outlines":
+                            outline_color = self.OUTLINE_COLOR[mat_name]["_OutlineColor"]
+                            node.inputs[5].default_value = (outline_color["r"], outline_color["g"], outline_color["b"], outline_color["a"])
+                        elif mat_name == "StellarToon - Hair Outlines":
+                            outline_color = self.OUTLINE_COLOR[mat_name]["_OutlineColor0"]
+                            node.inputs[5].default_value = (outline_color["r"], outline_color["g"], outline_color["b"], outline_color["a"])
+                        elif mat_name == "StellarToon - Base Outlines":
+                            for i in range(8):
+                                outline_color_key = f"_OutlineColor{i}"
+                                outline_color = self.OUTLINE_COLOR[mat_name][outline_color_key]
+                                node.inputs[5 + i].default_value = (outline_color["r"], outline_color["g"], outline_color["b"], outline_color["a"])
         
 
 class XJ_OP_HonkaiStarRailOutlineRemove(Operator):

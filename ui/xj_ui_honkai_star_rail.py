@@ -26,7 +26,7 @@ class XJ_HonkaiStarRail_UI():
     bpy.types.Scene.xj_honkai_star_rail_is_preset = bpy.props.BoolProperty(
         name=_("Is all in configs"),
         description=_("Is all in configs"),
-        default=False
+        default=True
     )
     # texure file
     bpy.types.Scene.xj_honkai_star_rail_material_path = bpy.props.StringProperty(
