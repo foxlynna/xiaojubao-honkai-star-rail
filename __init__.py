@@ -16,9 +16,9 @@ bl_info = {
 
 import bpy
 from .panel import XiaoJuBaoPanel
-from .operator import XJ_OP_HonkaiStarRail, XJ_OP_HonkaiStarRailLightModifier, XJ_OP_HonkaiStarRailLightModifierRemove,XJ_OP_HonkaiStarRailOutline, XJ_OP_HonkaiStarRailOutlineRemove
+from .operator import XJ_OP_HonkaiStarRail, XJ_OP_HonkaiStarRailLightModifier, XJ_OP_HonkaiStarRailLightModifierRemove,XJ_OP_HonkaiStarRailOutline, XJ_OP_HonkaiStarRailOutlineRemove, XJ_OP_HonkaiStarRailOutlineRemove, XJ_OP_HonkaiStarRailRunEntireSetup
 
-classes = (XiaoJuBaoPanel, XJ_OP_HonkaiStarRail, XJ_OP_HonkaiStarRailLightModifier, XJ_OP_HonkaiStarRailLightModifierRemove, XJ_OP_HonkaiStarRailOutline, XJ_OP_HonkaiStarRailOutlineRemove)
+classes = (XiaoJuBaoPanel, XJ_OP_HonkaiStarRail, XJ_OP_HonkaiStarRailLightModifier, XJ_OP_HonkaiStarRailLightModifierRemove, XJ_OP_HonkaiStarRailOutline, XJ_OP_HonkaiStarRailOutlineRemove, XJ_OP_HonkaiStarRailRunEntireSetup)
 
 register_class, unregister_class = bpy.utils.register_classes_factory(classes)
 def register():

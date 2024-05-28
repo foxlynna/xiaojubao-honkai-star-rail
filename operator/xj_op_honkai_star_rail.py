@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 import bpy
-from bpy.types import Operator, Image
+from bpy.types import Operator, Image, Object, Mesh, Material, MaterialSlot
 from bpy.app.translations import pgettext_iface as _
+from bpy.app.handlers import persistent
+from bpy.app.timers import register
+import bmesh
 import os
 import json
+import time
 from typing import Optional, Dict, Any, List
 from ..utils import MaterialUtils
+
+# constants
+NAME_OF_VERTEX_COLORS_INPUT = 'Input_3'
 
 class XJ_OP_HonkaiStarRail(Operator):
     """add honkai star rail material"""
@@ -16,7 +23,14 @@ class XJ_OP_HonkaiStarRail(Operator):
     
     LIGHT_VECTOR_NODE_NAME = "Light Vectors"
     STELLAR_TOON_OUTLINE_NODE_NAME = "StellarToon - Outlines GN"
-    STELLAR_MATERIAL_NAME = ["StellarToon - Base Outlines", "StellarToon - Base", "StellarToon - Hair", "StellarToon - Hair Outlines","StellarToon - Weapon","StellarToon - Weapon Outlines", "StellarToon - Face", "StellarToon - Face Outlines"]
+    STELLAR_MATERIAL_NAME = ["StellarToon - Base Outlines", 
+                             "StellarToon - Base", 
+                             "StellarToon - Hair", 
+                             "StellarToon - Hair Outlines",
+                             "StellarToon - Weapon",
+                             "StellarToon - Weapon Outlines", 
+                             "StellarToon - Face", 
+                             "StellarToon - Face Outlines"]
     # tex and material map
     TEX_MATERIAL_MAP = {
         "face": "StellarToon - Face",
@@ -47,16 +61,14 @@ class XJ_OP_HonkaiStarRail(Operator):
                 if not json_obj:
                     raise Exception("Failed to load preset json file")  
                 self.assign_materials_from_json(json_obj, context.scene.xj_honkai_star_rail_material_path)
-            if context.scene.xj_honkai_star_rail_is_join_mesh:
-                # join mesh
-                self.join_group_mesh(json_obj)
             # emmison material
             self.modify_emission_material(json_obj.get('emmision', []))
             # eyeshadow
             self.modify_eyeshadow_material(json_obj.get('eyeshadow', []))
             # head origin constraint
             self.set_child_of_constraints_to_heads()
-            
+            # gooengine_base_render_set
+            MaterialUtils.set_gooengine_base_render_set()
             return {'FINISHED'}
         else:
             return {'CANCELLED'}
@@ -238,12 +250,21 @@ class XJ_OP_HonkaiStarRail(Operator):
         print(image_map)
         return image_map
     
-    def material_add_tex(self, mesh, material_name, tex_file_path, type, role_name):
-        """material_add_tex"""
+    def material_add_tex(self, mesh: Mesh, adding_material_name, tex_file_path, type, role_name, mesh_material_name, slot: MaterialSlot):
+        """replace material
+
+        Args:
+            mesh (mesh): mesh
+            adding_material_name (str): adding material name
+            tex_file_path (str): tex_file_path
+            type (str): type
+            role_name (str): role_name
+            mesh_name_after (str): mesh_material_name
+        """
         # find material
-        mat = bpy.data.materials.get(material_name)
+        mat = bpy.data.materials.get(adding_material_name)
         if not mat:
-            print(f"No material found with the name '{material_name}'")
+            self.report({'ERROR'}, f"No material found with the name '{adding_material_name}'")
             return
         # generate material if not exist
         new_mat_name = role_name + "_" + type
@@ -264,11 +285,11 @@ class XJ_OP_HonkaiStarRail(Operator):
             self.get_body2_material(new_mat, tex_file_path)    
         elif type == "body":    
             self.get_body_material(new_mat, tex_file_path)
-        # mesh add material
-        if mesh.data.materials:
-            mesh.data.materials[0] = new_mat
-        else:
-            mesh.data.materials.append(new_mat)
+        # fix face outline, only face material name is {role_name}_face, other face material name is {role_name}_face_{material_name}
+        if type == "face" and mesh_material_name not in ["脸", "臉", "顏", "颜"]:
+            new_mat = new_mat.copy()
+            new_mat.name = role_name + "_" + type + "_" + mesh_material_name
+        slot.material = new_mat
     
     def get_texture_image(self, image_name, tex_file_path) -> Image:
         """get_texture_image"""
@@ -815,18 +836,22 @@ class XJ_OP_HonkaiStarRail(Operator):
         # loop selected objects
         for obj in bpy.context.selected_objects:
             if obj.type == 'MESH':
-                # mesh_name_after
-                parts = obj.name.split('_')
-                if len(parts) > 1:
-                    mesh_name_after = parts[1]
-                    # find mesh_name_after type in material_map
-                    for key, items in material_map.items():
-                        if mesh_name_after in items:
-                            # get material name
-                            material_name = self.TEX_MATERIAL_MAP.get(key)
-                            if material_name:
-                               self.material_add_tex(obj, material_name, None, key, role_name)
-                            break            
+                # Loop through all material slots
+                for slot in obj.material_slots:
+                    mesh_material = slot.material
+                    if mesh_material:
+                        mesh_material_name = mesh_material.name
+                        print(f"Object: {obj.name}, Material Slot: {slot.name}, Material: {mesh_material_name}")                
+                        # find mesh_material_name type in material_map
+                        for key, items in material_map.items():
+                            if mesh_material_name in items:
+                                # get adding material name
+                                adding_material_name = self.TEX_MATERIAL_MAP.get(key)
+                                if adding_material_name:
+                                    self.material_add_tex(obj, adding_material_name, None, key, role_name, mesh_material_name, slot)
+                                    break
+                # set mesh object slot default index
+                obj.active_material_index = 0
     
     def assign_materials_from_json(self, json_obj: Dict[str, Any], tex_file_path: str) -> None:
         material_map = json_obj['material_map']
@@ -834,18 +859,20 @@ class XJ_OP_HonkaiStarRail(Operator):
         # loop selected objects
         for obj in bpy.context.selected_objects:
             if obj.type == 'MESH':
-                # mesh_name_after
-                parts = obj.name.split('_')
-                if len(parts) > 1:
-                    mesh_name_after = parts[1]
-                    # find mesh_name_after type in material_map
-                    for key, items in material_map.items():
-                        if mesh_name_after in items:
-                            # get material name
-                            material_name = self.TEX_MATERIAL_MAP.get(key)
-                            if material_name:
-                               self.material_add_tex(obj, material_name, tex_file_path, key, role_name)
-                            break
+                # Loop through all material slots
+                for slot in obj.material_slots:
+                    mesh_material = slot.material
+                    if mesh_material:
+                        mesh_material_name = mesh_material.name
+                        print(f"Object: {obj.name}, Material Slot: {slot.name}, Material: {mesh_material_name}")                
+                        # find mesh_material_name type in material_map
+                        for key, items in material_map.items():
+                            if mesh_material_name in items:
+                                # get material name
+                                adding_material_name = self.TEX_MATERIAL_MAP.get(key)
+                                if adding_material_name:
+                                    self.material_add_tex(obj, adding_material_name, tex_file_path, key, role_name, mesh_material_name, slot)
+                                break
                         
     def join_group_mesh(self, json_obj: Dict[str, Any]) -> None:
         """join same group mesh"""
@@ -1073,6 +1100,12 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
     node_group_name = "StellarToon - Outlines GN"
     # outline modifier name
     outline_modifier_name = "XJ-StellarToon - Outlines GN"
+    # outline material
+    OUTLINE_MATERIAL = [
+        "StellarToon - Face Outlines",
+        "StellarToon - Hair Outlines",
+        "StellarToon - Base Outlines"
+    ]
     # tex and outline material map
     TEX_OUTLINE_MATERIAL_MAP = {
         "face": "StellarToon - Face Outlines",
@@ -1080,6 +1113,74 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
         "body": "StellarToon - Base Outlines",
         "body1": "StellarToon - Base Outlines",
         "body2": "StellarToon - Base Outlines",
+    }
+    OUTLINE_COLOR = {
+        "StellarToon - Face Outlines": {
+            "_OutlineColor": {
+                "r": 0.4528302,
+                "g": 0.3268067,
+                "b": 0.33669087,
+                "a": 1.0
+            }
+        },
+        "StellarToon - Hair Outlines": {
+            "_OutlineColor0": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 1.0
+            }
+        },
+        "StellarToon - Base Outlines": {
+            "_OutlineColor0": {
+                "r": 0.4509804,
+                "g": 0.3254902,
+                "b": 0.3372549,
+                "a": 1.0
+            },
+            "_OutlineColor1": {
+                "r": 0.3033755,
+                "g": 0.28511038,
+                "b": 0.4056604,
+                "a": 1.0
+            },
+            "_OutlineColor2": {
+                "r": 0.2264151,
+                "g": 0.15699537,
+                "b": 0.15699537,
+                "a": 1.0
+            },
+            "_OutlineColor3": {
+                "r": 0.22365607,
+                "g": 0.21555711,
+                "b": 0.26415092,
+                "a": 1.0
+            },
+            "_OutlineColor4": {
+                "r": 0.3301887,
+                "g": 0.2289516,
+                "b": 0.23495466,
+                "a": 1.0
+            },
+            "_OutlineColor5": {
+                "r": 0.27358484,
+                "g": 0.17163578,
+                "b": 0.20986667,
+                "a": 1.0
+            },
+            "_OutlineColor6": {
+                "r": 0.23673905,
+                "g": 0.26965,
+                "b": 0.3773585,
+                "a": 1.0
+            },
+            "_OutlineColor7": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+            }
+        }
     }
     
 
@@ -1093,37 +1194,17 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
             json_obj = MaterialUtils.load_first_script_as_json(blend_file_path)
         else:
             json_obj = MaterialUtils.load_role_json_obj(context.scene.xj_honkai_star_rail_role_json_file_path)
-        material_map = json_obj['material_map']
         
-        # 遍历所有选中的网格对象 iterate over selected mesh objects
+        # iterate over selected mesh objects
         for obj in selected_objects:
             if obj.type == 'MESH':
-                # mesh_name_after
-                parts = obj.name.split('_')
-                if len(parts) > 1:
-                    mesh_name_after = parts[1]
-                    # find mesh_name_after type in material_map
-                    for key, items in material_map.items():
-                        if mesh_name_after in items:
-                            # get material name
-                            material_name = self.TEX_OUTLINE_MATERIAL_MAP.get(key)
-                            if material_name:
-                               self.material_add_outline(obj, material_name)
-                            else:
-                                self.report({'WARNING'}, f"Mesh '{obj.name}' not found in material map.")
-                            break
-                else: # not found mesh_name_after, use joined name: face/body/body1/body2/hair
-                    obj_name = obj.name
-                    material_name = self.TEX_OUTLINE_MATERIAL_MAP.get(obj_name)
-                    if material_name:
-                        self.material_add_outline(obj, material_name)
-                    else:
-                        self.report({'WARNING'}, f"Mesh '{obj_name}' not found in material map.")
-                    
-
+                # self.paint_vertex_color(obj.data)
+                self.material_add_outline(obj, json_obj["role_name"])
+                # append outline material
+                self.set_outline_mat_default_value(obj)
         return {'FINISHED'}
     
-    def material_add_outline(self, obj, material_name):
+    def material_add_outline(self, obj: Mesh, role_name: str):
         geo_node_mod = None
         # loop modifiers
         for mod in obj.modifiers:
@@ -1141,23 +1222,103 @@ class XJ_OP_HonkaiStarRailOutline(Operator):
             return {'CANCELLED'}
         
         geo_node_mod.node_group = node_group
+        # vertex color
+        # input_color = node_group.inputs.get("Vertex Colors")
+        # if input_color:
+        #     self.set_up_modifier_vertex_color(geo_node_mod, obj)
         
         # set inputs
         input_thickness = node_group.inputs.get("Outline Thickness")
-        input_mask_material = node_group.inputs.get("Outline 1 Mask")
-        input_outline_material = node_group.inputs.get("Outline 1 Material")
-        
         # set outline thickness
         if input_thickness:
             geo_node_mod[input_thickness.identifier] = bpy.context.scene.xj_honkai_star_rail_outline_thickness
+            
+        for index, key in enumerate(self.TEX_OUTLINE_MATERIAL_MAP.keys()):
+            mask_material_name = role_name + "_" + key
+            mask_material = bpy.data.materials.get(mask_material_name)
+            if not mask_material:
+                self.report({'WARNING'}, f"Material '{mask_material_name}' not found.")
+                continue
+            
+            outline_material_name = self.TEX_OUTLINE_MATERIAL_MAP[key]
+            outline_material = bpy.data.materials.get(outline_material_name)
+            
+            if outline_material:
+                # Set Outline Mask and Material
+                input_mask_material = node_group.inputs.get(f"Outline {index + 1} Mask")
+                input_outline_material = node_group.inputs.get(f"Outline {index + 1} Material")
+                if input_mask_material:
+                    geo_node_mod[input_mask_material.identifier] = mask_material
+                if input_outline_material:
+                    geo_node_mod[input_outline_material.identifier] = outline_material
+    
+    def set_up_modifier_vertex_color(self, modifier, mesh):
+        if modifier[f'{NAME_OF_VERTEX_COLORS_INPUT}_use_attribute'] == 0:
+            with bpy.context.temp_override(active_object=bpy.data.objects[mesh.name]):
+                bpy.context.view_layer.objects.active = bpy.context.active_object
 
-        # set input_mask_material
-        if input_mask_material and obj.material_slots:
-            geo_node_mod[input_mask_material.identifier] = obj.material_slots[0].material
+                if bpy.app.version >= (4,0,0):
+                    bpy.ops.object.geometry_nodes_input_attribute_toggle(
+                        input_name=NAME_OF_VERTEX_COLORS_INPUT, 
+                        modifier_name=modifier.name
+                    )
+                else:
+                    bpy.ops.object.geometry_nodes_input_attribute_toggle(
+                        prop_path=f"[\"{NAME_OF_VERTEX_COLORS_INPUT}_use_attribute\"]", 
+                        modifier_name=modifier.name
+                    )
 
-        # set input_outline_material
-        if input_outline_material:
-            geo_node_mod[input_outline_material.identifier] = bpy.data.materials.get(material_name)
+        modifier[f'{NAME_OF_VERTEX_COLORS_INPUT}_attribute_name'] = 'Col'
+        
+    def paint_vertex_color(self, mesh: Mesh):
+        if not isinstance(mesh, Mesh):
+            print("Provided object is not a Mesh")
+            return
+        # check if vertex color layer exists
+        color_layer = mesh.vertex_colors.get('Col')
+        if not color_layer:
+            # if not, create it
+            color_layer = mesh.vertex_colors.new(name='Col')
+            print("Created new vertex color layer 'Col'")
+        else:
+            print("Using existing vertex color layer 'Col'")
+
+        # set color value
+        color_value = (1, 0.502, 0.502, 0.5)
+        
+        color_layer_index = 0
+        for poly in mesh.polygons:
+            for indice in poly.loop_indices:
+                color_layer.data[color_layer_index].color = (1, 0.502, 0.502, 0.5)
+                color_layer_index += 1
+        print(f"Set vertex colors to {color_value} in layer 'Col'")
+        
+    def set_outline_mat_default_value(self, obj: Object):
+        """Add outline materials to the object's material slots"""
+        for mat_name in self.OUTLINE_MATERIAL:
+            if not any(slot.material and slot.material.name == mat_name for slot in obj.material_slots):
+                if bpy.data.materials.get(mat_name):
+                    obj.data.materials.append(bpy.data.materials[mat_name])
+        
+        # Set the values for the node groups
+        for mat_name in self.OUTLINE_MATERIAL:
+            mat = bpy.data.materials.get(mat_name)
+            if mat and mat.node_tree:
+                nodes = mat.node_tree.nodes
+                for node in nodes:
+                    if node.type == 'GROUP' and node.name.startswith("Group.006"):
+                        if mat_name == "StellarToon - Face Outlines":
+                            outline_color = self.OUTLINE_COLOR[mat_name]["_OutlineColor"]
+                            node.inputs[5].default_value = (outline_color["r"], outline_color["g"], outline_color["b"], outline_color["a"])
+                        elif mat_name == "StellarToon - Hair Outlines":
+                            outline_color = self.OUTLINE_COLOR[mat_name]["_OutlineColor0"]
+                            node.inputs[5].default_value = (outline_color["r"], outline_color["g"], outline_color["b"], outline_color["a"])
+                        elif mat_name == "StellarToon - Base Outlines":
+                            for i in range(8):
+                                outline_color_key = f"_OutlineColor{i}"
+                                outline_color = self.OUTLINE_COLOR[mat_name][outline_color_key]
+                                node.inputs[5 + i].default_value = (outline_color["r"], outline_color["g"], outline_color["b"], outline_color["a"])
+        
 
 class XJ_OP_HonkaiStarRailOutlineRemove(Operator):
     """remove outline"""
@@ -1184,4 +1345,45 @@ class XJ_OP_HonkaiStarRailOutlineRemove(Operator):
                         obj.modifiers.remove(mod)
                         break
 
-        return {'FINISHED'}            
+        return {'FINISHED'}
+
+
+class XJ_OP_HonkaiStarRailRunEntireSetup(Operator):
+    """run entire setup"""
+    bl_idname = "xj.honkai_star_rail_run_entire_setup"
+    bl_label = "Run Entire Setup"
+    bl_description = _("Run Entire Setup for MMD Model")
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        # Step 1: Start importing the MMD model
+        bpy.ops.mmd_tools.import_model('INVOKE_DEFAULT')
+        
+        # Step 2: Set up a timer to check for the model import completion
+        register(self.check_import_completion)
+       
+        return {'FINISHED'}
+    
+    def check_import_completion(self):
+        # Check if the model has been imported by looking for specific objects
+        if self.is_model_imported():
+            # Step 3: Convert the materials
+            bpy.ops.mmd_tools.convert_materials()
+            
+            # Step 4: all processes
+            bpy.ops.xj.honkai_star_rail_add()
+            bpy.ops.xj.honkai_star_rail_add_light_modifier()
+            bpy.ops.xj.honkai_star_rail_outline_add()
+            
+            # Import completed and operations finished
+            return None  # Returning None stops the timer
+            
+        # If the model is not imported yet, check again after 0.5 seconds
+        return 0.5
+    
+    def is_model_imported(self):
+        # Check for specific objects that indicate the model has been imported
+        for obj in bpy.context.selected_objects:
+            if obj.type == 'MESH' and hasattr(obj, 'mmd_root'):
+                return True
+        return False

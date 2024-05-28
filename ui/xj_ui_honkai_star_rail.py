@@ -26,12 +26,6 @@ class XJ_HonkaiStarRail_UI():
     bpy.types.Scene.xj_honkai_star_rail_is_preset = bpy.props.BoolProperty(
         name=_("Is all in configs"),
         description=_("Is all in configs"),
-        default=False
-    )
-    # is join mesh
-    bpy.types.Scene.xj_honkai_star_rail_is_join_mesh = bpy.props.BoolProperty(
-        name=_("Whether to merge meshes in the same group"),
-        description=_("Whether to merge meshes in the same group"),
         default=True
     )
     # texure file
@@ -72,7 +66,7 @@ class XJ_HonkaiStarRail_UI():
         row.prop(scene, "xj_honkai_star_rail_is_preset", text=_("Is it to integrate configuration files"))
         
         row = box.row()
-        row.prop(scene, "xj_honkai_star_rail_is_join_mesh", text=_("Whether to merge meshes in the same group"))
+        row.operator("xj.honkai_star_rail_run_entire_setup", text=_("Run Entire Setup"), icon="BLENDER")
         
         row = box.row()
         row.enabled = not scene.xj_honkai_star_rail_is_preset
