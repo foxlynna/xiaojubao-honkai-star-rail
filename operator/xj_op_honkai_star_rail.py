@@ -1367,6 +1367,14 @@ class XJ_OP_HonkaiStarRailRunEntireSetup(Operator):
     def check_import_completion(self):
         # Check if the model has been imported by looking for specific objects
         if self.is_model_imported():
+            for obj in bpy.context.selected_objects:
+                if obj.type == 'EMPTY':
+                    # active mesh object
+                    self.select_mesh_children(obj)
+            if bpy.context.view_layer.objects.active.type != 'MESH':
+                self.report({'ERROR'}, "No mesh object selected.")
+                return {'CANCELLED'}
+            
             # Step 3: Convert the materials
             bpy.ops.mmd_tools.convert_materials()
             
@@ -1384,6 +1392,22 @@ class XJ_OP_HonkaiStarRailRunEntireSetup(Operator):
     def is_model_imported(self):
         # Check for specific objects that indicate the model has been imported
         for obj in bpy.context.selected_objects:
-            if obj.type == 'MESH' and hasattr(obj, 'mmd_root'):
+            if obj.type == 'EMPTY':
                 return True
         return False
+    
+    def select_mesh_children(self, obj: Object) -> bool:
+        """empty select mesh children
+        Args:
+            obj (Object): empty
+        """
+        # Iterate through the children of the object
+        for child in obj.children:
+            # Check if the child is a mesh
+            if child.type == 'MESH' and hasattr(obj, 'mmd_root'):
+                # Select the mesh
+                child.select_set(True)
+                bpy.context.view_layer.objects.active = child
+                return True
+            # Recursively check the child's children
+            self.select_mesh_children(child)
